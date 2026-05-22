@@ -1,0 +1,536 @@
+<%- include('../partials/header') %>
+
+<main class="container">
+  
+  <div class="dashboard-layout">
+    
+    <!-- Sidebar -->
+    <%- include('../partials/sidebar') %>
+    
+    <!-- Content Panel -->
+    <div class="dashboard-content">
+      
+      <div class="dashboard-title-row">
+        <h1>Create Event</h1>
+      </div>
+
+      <% if (error) { %>
+        <div class="alert alert-danger">
+          <i class="fa-solid fa-circle-exclamation"></i> <%= error %>
+        </div>
+      <% } %>
+
+      <form action="/organiser/create-event" method="POST" enctype="multipart/form-data" class="dashboard-card" style="margin: 0; padding: 30px;">
+        
+        <!-- SECTION 1: Event Details -->
+        <h3 style="font-size: 1.25rem; font-weight: 700; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 20px;">
+          <i class="fa-solid fa-circle-info" style="color: var(--accent-color);"></i> 1. Event Information
+        </h3>
+
+        <div class="form-group">
+          <label for="event-title">Event Title *</label>
+          <input type="text" id="event-title" name="title" class="form-control" placeholder="e.g. Sunburn Beach Festival" required>
+        </div>
+
+        <!-- AI Description Tool integration -->
+        <div class="form-group" style="background: rgba(255,255,255,0.01); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; margin-bottom: 20px;">
+          <label style="color: var(--text-main); font-weight: 600;"><i class="fa-solid fa-wand-magic-sparkles" style="color: #a855f7;"></i> AI Description Assistant (Optional)</label>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">Enter bullet points of your event details, and the AI will draft a beautiful description page.</p>
+          <textarea id="ai-bullet-points" class="form-control" placeholder="• Live performance by top artist&#10;• Beachside food stalls and drinks&#10;• Gate entry starts at 3 PM" rows="3" style="background: var(--bg-primary);"></textarea>
+          <button type="button" id="ai-generate-desc-btn" class="btn btn-secondary" style="margin-top: 10px; font-size: 0.85rem; background: rgba(168, 85, 247, 0.1); border-color: rgba(168, 85, 247, 0.2); color: #a855f7;">
+            Generate Description
+          </button>
+        </div>
+
+        <div class="form-group">
+          <label for="event-desc">Event Description (Rich HTML editor or standard text) *</label>
+          <textarea id="event-desc" name="description" class="form-control" placeholder="Provide full details about what attendees will experience..." rows="6" required></textarea>
+        </div>
+
+        <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <div>
+            <label for="event-category">Category *</label>
+            <select id="event-category" name="category" class="form-control" style="background: var(--bg-secondary); color: white;" required>
+              <option value="Music">Music</option>
+              <option value="Comedy">Comedy</option>
+              <option value="Tech">Tech</option>
+              <option value="Movies">Movies</option>
+              <option value="Sports">Sports</option>
+            </select>
+          </div>
+          <div>
+            <label for="event-banner">Banner Image (PNG, JPG, WebP) *</label>
+            <input type="file" id="event-banner" class="form-control" accept="image/*">
+            <input type="hidden" id="event-banner-base64" name="banner_image_base64">
+            <div id="banner-preview-container" style="display: none; margin-top: 12px; border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); height: 150px; width: 100%; box-shadow: 0 4px 15px rgba(0,0,0,0.15);">
+              <img id="banner-preview-img" src="" alt="Banner Preview" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <div>
+            <label for="start-date">Start Date & Time *</label>
+            <input type="datetime-local" id="start-date" name="start_date" class="form-control" required>
+          </div>
+          <div>
+            <label for="end-date">End Date & Time *</label>
+            <input type="datetime-local" id="end-date" name="end_date" class="form-control" required>
+          </div>
+        </div>
+
+        <!-- Physical/Online venue checkbox toggle -->
+        <div class="form-group">
+          <label class="form-check" style="margin-bottom: 12px;">
+            <input type="checkbox" id="is-online-checkbox" name="is_online" value="1">
+            <span>This is an Online / Virtual Event (No physical venue)</span>
+          </label>
+        </div>
+
+        <!-- Venue fields -->
+        <div id="physical-venue-fields" style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+          <div class="form-group">
+            <label for="venue-name">Venue Name</label>
+            <input type="text" id="venue-name" name="venue_name" class="form-control" placeholder="e.g. Vagator Beach Stage A">
+          </div>
+          <div class="form-group">
+            <label for="venue-city">City</label>
+            <input type="text" id="venue-city" name="city" class="form-control" placeholder="e.g. Goa">
+          </div>
+        </div>
+        
+        <div id="physical-address-field" class="form-group">
+          <label for="venue-address">Full Venue Address</label>
+          <input type="text" id="venue-address" name="venue_address" class="form-control" placeholder="Full street address...">
+        </div>
+
+        <!-- Online link input -->
+        <div id="online-link-field" class="form-group" style="display: none;">
+          <label for="online-link">Virtual Event Access Link (Sent to registered users)</label>
+          <input type="url" id="online-link" name="online_link" class="form-control" placeholder="https://zoom.us/... or YouTube Live stream URL">
+        </div>
+
+
+        <!-- SECTION 2: Ticket Tiers -->
+        <h3 style="font-size: 1.25rem; font-weight: 700; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-top: 40px; margin-bottom: 20px;">
+          <i class="fa-solid fa-tags" style="color: var(--accent-color);"></i> 2. Ticket Tiers & Capacity
+        </h3>
+        
+        <div id="tickets-container" style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px;">
+          <!-- Default Row (always present) -->
+          <div class="ticket-entry-row" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px;">
+            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 15px; margin-bottom: 12px;">
+              <div>
+                <label>Tier Name (e.g. VIP Pass, Early Bird) *</label>
+                <input type="text" name="ticket_names[]" class="form-control" placeholder="General Admission" required>
+              </div>
+              <div>
+                <label>Price (Rs.) *</label>
+                <input type="number" name="ticket_prices[]" class="form-control" placeholder="0 for Free" min="0" required>
+              </div>
+              <div>
+                <label>Capacity *</label>
+                <input type="number" name="ticket_capacities[]" class="form-control" placeholder="100" min="1" required>
+              </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 15px;">
+              <div>
+                <label>Discount Code (Opt)</label>
+                <input type="text" name="discount_codes[]" class="form-control" placeholder="SUNBURN10" style="text-transform: uppercase;">
+              </div>
+              <div>
+                <label>Discount % (Opt)</label>
+                <input type="number" name="discount_percents[]" class="form-control" placeholder="10" min="0" max="100">
+              </div>
+              <div>
+                <label>Early Bird Price (Opt)</label>
+                <input type="number" name="early_bird_prices[]" class="form-control" placeholder="Lower Price" min="0">
+              </div>
+              <div>
+                <label>Early Bird Expiry (Opt)</label>
+                <input type="datetime-local" name="early_bird_expiries[]" class="form-control">
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <button type="button" id="add-ticket-btn" class="btn btn-secondary" style="font-size: 0.85rem;"><i class="fa-solid fa-plus"></i> Add Another Ticket Tier</button>
+
+
+        <!-- SECTION 3: Sessions Schedule -->
+        <h3 style="font-size: 1.25rem; font-weight: 700; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-top: 40px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+          <span><i class="fa-solid fa-list-ol" style="color: var(--accent-color);"></i> 3. Sessions Agenda</span>
+          <button type="button" id="ai-optimise-schedule-btn" class="btn btn-secondary" style="font-size: 0.75rem; background: rgba(168, 85, 247, 0.1); border-color: rgba(168, 85, 247, 0.2); color: #a855f7;">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Optimise Schedule Flow
+          </button>
+        </h3>
+        
+        <div id="sessions-container" style="margin-bottom: 20px;">
+          <!-- Sessions added dynamically -->
+        </div>
+        
+        <button type="button" id="add-session-btn" class="btn btn-secondary" style="font-size: 0.85rem;"><i class="fa-solid fa-plus"></i> Add Session Slot</button>
+
+
+        <!-- SECTION 4: Speakers & Host -->
+        <h3 style="font-size: 1.25rem; font-weight: 700; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-top: 40px; margin-bottom: 20px;">
+          <i class="fa-solid fa-user-tie" style="color: var(--accent-color);"></i> 4. Event Speakers & Hosts
+        </h3>
+        
+        <div id="speakers-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+          <!-- Speakers added dynamically -->
+        </div>
+        
+        <button type="button" id="add-speaker-btn" class="btn btn-secondary" style="font-size: 0.85rem;"><i class="fa-solid fa-plus"></i> Add Speaker Profile</button>
+
+
+        <!-- SECTION 5: FAQs -->
+        <h3 style="font-size: 1.25rem; font-weight: 700; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-top: 40px; margin-bottom: 20px;">
+          <i class="fa-solid fa-circle-question" style="color: var(--accent-color);"></i> 5. Event FAQs
+        </h3>
+        
+        <div id="faq-container" style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px;">
+          <!-- FAQs added dynamically -->
+        </div>
+        
+        <button type="button" id="add-faq-btn" class="btn btn-secondary" style="font-size: 0.85rem;"><i class="fa-solid fa-plus"></i> Add FAQ Item</button>
+
+
+        <div style="margin-top: 50px; display: flex; gap: 20px; border-top: 1px solid var(--border-color); padding-top: 30px;">
+          <a href="/organiser/dashboard" class="btn btn-secondary" style="flex: 1; padding: 15px;">Cancel</a>
+          <button type="submit" class="btn btn-primary" style="flex: 2; padding: 15px; font-size: 1.1rem; box-shadow: var(--shadow-neon);">Publish Event Listing <i class="fa-solid fa-circle-check"></i></button>
+        </div>
+
+      </form>
+    </div>
+
+  </div>
+
+</main>
+
+<script>
+  // Venue toggle logic
+  const isOnlineCheckbox = document.getElementById('is-online-checkbox');
+  const physicalVenueFields = document.getElementById('physical-venue-fields');
+  const physicalAddressField = document.getElementById('physical-address-field');
+  const onlineLinkField = document.getElementById('online-link-field');
+
+  isOnlineCheckbox.addEventListener('change', () => {
+    if (isOnlineCheckbox.checked) {
+      physicalVenueFields.style.display = 'none';
+      physicalAddressField.style.display = 'none';
+      onlineLinkField.style.display = 'block';
+      document.getElementById('venue-city').value = 'Online';
+      document.getElementById('venue-name').value = 'Virtual Link';
+    } else {
+      physicalVenueFields.style.display = 'grid';
+      physicalAddressField.style.display = 'block';
+      onlineLinkField.style.display = 'none';
+      document.getElementById('venue-city').value = '';
+      document.getElementById('venue-name').value = '';
+    }
+  });
+
+  // Dynamic ticket tiers add
+  const addTicketBtn = document.getElementById('add-ticket-btn');
+  const ticketsContainer = document.getElementById('tickets-container');
+  addTicketBtn.addEventListener('click', () => {
+    const row = document.createElement('div');
+    row.className = 'ticket-entry-row';
+    row.style.background = 'var(--bg-secondary)';
+    row.style.border = '1px solid var(--border-color)';
+    row.style.borderRadius = '12px';
+    row.style.padding = '20px';
+    row.style.marginTop = '15px';
+    
+    row.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h4 style="font-size: 0.95rem;">Additional Ticket Tier</h4>
+        <button type="button" class="btn btn-danger remove-row-btn" style="padding: 4px 8px; font-size: 0.75rem;">Remove</button>
+      </div>
+      <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 15px; margin-bottom: 12px;">
+        <div>
+          <label>Tier Name (e.g. VIP Pass, Early Bird) *</label>
+          <input type="text" name="ticket_names[]" class="form-control" placeholder="General Admission" required>
+        </div>
+        <div>
+          <label>Price (Rs.) *</label>
+          <input type="number" name="ticket_prices[]" class="form-control" placeholder="0" min="0" required>
+        </div>
+        <div>
+          <label>Capacity *</label>
+          <input type="number" name="ticket_capacities[]" class="form-control" placeholder="100" min="1" required>
+        </div>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 15px;">
+        <div>
+          <label>Discount Code (Opt)</label>
+          <input type="text" name="discount_codes[]" class="form-control" placeholder="CODE10" style="text-transform: uppercase;">
+        </div>
+        <div>
+          <label>Discount % (Opt)</label>
+          <input type="number" name="discount_percents[]" class="form-control" placeholder="10" min="0" max="100">
+        </div>
+        <div>
+          <label>Early Bird Price (Opt)</label>
+          <input type="number" name="early_bird_prices[]" class="form-control" placeholder="Lower Price" min="0">
+        </div>
+        <div>
+          <label>Early Bird Expiry (Opt)</label>
+          <input type="datetime-local" name="early_bird_expiries[]" class="form-control">
+        </div>
+      </div>
+    `;
+    ticketsContainer.appendChild(row);
+  });
+
+  // Dynamic session add
+  const addSessionBtn = document.getElementById('add-session-btn');
+  const sessionsContainer = document.getElementById('sessions-container');
+  addSessionBtn.addEventListener('click', () => {
+    const row = document.createElement('div');
+    row.className = 'session-item-row';
+    row.innerHTML = `
+      <div class="session-inputs">
+        <input type="text" name="agenda_times[]" class="form-control session-time-input" placeholder="Time (e.g. 10:00 AM)" required>
+        <input type="text" name="agenda_titles[]" class="form-control session-title-input" placeholder="Session Title (e.g. Opening Keynote)" required>
+        <input type="text" name="session_speakers[]" class="form-control session-speaker-input" placeholder="Speaker name (Opt)">
+      </div>
+      <button type="button" class="btn btn-danger remove-row-btn" style="padding: 10px;"><i class="fa-solid fa-trash"></i></button>
+    `;
+    sessionsContainer.appendChild(row);
+  });
+
+  // Dynamic speaker add
+  const addSpeakerBtn = document.getElementById('add-speaker-btn');
+  const speakersContainer = document.getElementById('speakers-container');
+  addSpeakerBtn.addEventListener('click', () => {
+    const el = document.createElement('div');
+    el.style.background = 'var(--bg-secondary)';
+    el.style.border = '1px solid var(--border-color)';
+    el.style.borderRadius = '8px';
+    el.style.padding = '15px';
+    el.style.position = 'relative';
+    el.innerHTML = `
+      <button type="button" class="btn btn-danger remove-row-btn" style="position: absolute; right: 10px; top: 10px; padding: 4px 8px; font-size: 0.7rem;">X</button>
+      <div class="form-group" style="margin-bottom: 10px;">
+        <label>Speaker Name</label>
+        <input type="text" name="speaker_names[]" class="form-control" placeholder="e.g. John Hammond" required>
+      </div>
+      <div class="form-group" style="margin-bottom: 0;">
+        <label>Designation / Bio</label>
+        <input type="text" name="speaker_titles[]" class="form-control" placeholder="e.g. Senior Architect" required>
+      </div>
+    `;
+    speakersContainer.appendChild(el);
+  });
+
+  // Dynamic FAQ add
+  const addFaqBtn = document.getElementById('add-faq-btn');
+  const faqContainer = document.getElementById('faq-container');
+  addFaqBtn.addEventListener('click', () => {
+    const el = document.createElement('div');
+    el.style.background = 'var(--bg-secondary)';
+    el.style.border = '1px solid var(--border-color)';
+    el.style.borderRadius = '8px';
+    el.style.padding = '15px';
+    el.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span style="font-size: 0.85rem; font-weight: bold; color: var(--text-muted);">FAQ Item</span>
+        <button type="button" class="btn btn-danger remove-row-btn" style="padding: 4px 8px; font-size: 0.7rem;">Remove</button>
+      </div>
+      <div class="form-group" style="margin-bottom: 10px;">
+        <input type="text" name="faq_questions[]" class="form-control" placeholder="Question" required>
+      </div>
+      <div class="form-group" style="margin-bottom: 0;">
+        <input type="text" name="faq_answers[]" class="form-control" placeholder="Answer" required>
+      </div>
+    `;
+    faqContainer.appendChild(el);
+  });
+
+  // Global Event Listener for removals
+  document.addEventListener('click', (e) => {
+    if (e.target && (e.target.classList.contains('remove-row-btn') || e.target.closest('.remove-row-btn'))) {
+      const btn = e.target.classList.contains('remove-row-btn') ? e.target : e.target.closest('.remove-row-btn');
+      const row = btn.closest('.ticket-entry-row') || btn.closest('.session-item-row') || btn.parentNode || btn.closest('div');
+      row.remove();
+    }
+  });
+
+  // AI Description Assistant Trigger
+  const generateDescBtn = document.getElementById('ai-generate-desc-btn');
+  generateDescBtn.addEventListener('click', async () => {
+    const bulletPoints = document.getElementById('ai-bullet-points').value;
+    const category = document.getElementById('event-category').value;
+    const title = document.getElementById('event-title').value;
+
+    if (!bulletPoints) {
+      alert('Please enter some bullet points first!');
+      return;
+    }
+
+    generateDescBtn.disabled = true;
+    generateDescBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Writing...';
+
+    try {
+      const response = await fetch('/ai/generate-description', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ bulletPoints, category, title })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        document.getElementById('event-desc').value = data.text;
+      } else {
+        alert('AI service failed. You can type manually.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Network error connecting to AI service.');
+    } finally {
+      generateDescBtn.disabled = false;
+      generateDescBtn.textContent = 'Generate Description';
+    }
+  });
+
+  // AI Schedule Optimiser Trigger
+  const optimiseScheduleBtn = document.getElementById('ai-optimise-schedule-btn');
+  optimiseScheduleBtn.addEventListener('click', async () => {
+    // Collect all current session rows
+    const times = document.querySelectorAll('.session-time-input');
+    const titles = document.querySelectorAll('.session-title-input');
+    const speakers = document.querySelectorAll('.session-speaker-input');
+
+    const sessionsList = [];
+    for (let i = 0; i < times.length; i++) {
+      if (times[i] && titles[i] && titles[i].value) {
+        sessionsList.push({
+          time: times[i].value,
+          title: titles[i].value,
+          speaker: speakers[i] ? speakers[i].value : ''
+        });
+      }
+    }
+
+    if (sessionsList.length < 2) {
+      alert('Please add at least 2 sessions to optimise schedule ordering!');
+      return;
+    }
+
+    optimiseScheduleBtn.disabled = true;
+    optimiseScheduleBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Arranging...';
+
+    try {
+      const response = await fetch('/ai/suggest-schedule', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ sessionsList })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        
+        // Re-populate sessions with suggestions
+        sessionsContainer.innerHTML = '';
+        data.schedule.forEach(session => {
+          const row = document.createElement('div');
+          row.className = 'session-item-row';
+          row.innerHTML = `
+            <div class="session-inputs">
+              <input type="text" name="agenda_times[]" class="form-control session-time-input" value="${session.time}" placeholder="Time" required>
+              <input type="text" name="agenda_titles[]" class="form-control session-title-input" value="${session.title}" placeholder="Session Title" required>
+              <input type="text" name="session_speakers[]" class="form-control session-speaker-input" value="${session.speaker || ''}" placeholder="Speaker">
+            </div>
+            <button type="button" class="btn btn-danger remove-row-btn" style="padding: 10px;"><i class="fa-solid fa-trash"></i></button>
+          `;
+          sessionsContainer.appendChild(row);
+        });
+        
+        alert('Sessions ordered optimally by AI! Check the reasons in console logs or verify the schedule.');
+      } else {
+        alert('Failed to optimize schedule ordering.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error connecting to AI Schedule service.');
+    } finally {
+      optimiseScheduleBtn.disabled = false;
+      optimiseScheduleBtn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> Optimise Schedule Flow';
+    }
+  });
+
+  // Add 1 default session slot to start
+  addSessionBtn.click();
+
+  // Client-side image compression & live preview
+  const bannerInput = document.getElementById('event-banner');
+  const base64Input = document.getElementById('event-banner-base64');
+  const previewContainer = document.getElementById('banner-preview-container');
+  const previewImg = document.getElementById('banner-preview-img');
+
+  bannerInput.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Show loading state
+    const submitBtn = document.querySelector('button[type="submit"]');
+    const originalBtnText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Processing Banner Image...';
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      const img = new Image();
+      img.onload = function() {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        // Set optimal banner dimensions (e.g. 800px max width)
+        const MAX_WIDTH = 800;
+        const MAX_HEIGHT = 480;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Compress image to JPEG at 0.60 quality (extremely optimized payload)
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.60);
+        base64Input.value = dataUrl;
+        
+        // Show live preview
+        previewImg.src = dataUrl;
+        previewContainer.style.display = 'block';
+
+        // Re-enable submit button
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+</script>
+
+<%- include('../partials/footer') %>

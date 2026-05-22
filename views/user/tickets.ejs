@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Print Ticket - EventSphere</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f6f6f9;
+      color: #333;
+      margin: 0;
+      padding: 40px 20px;
+      display: flex;
+      justify-content: center;
+    }
+    .ticket-container {
+      width: 650px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      overflow: hidden;
+      border: 1px solid #ddd;
+    }
+    .ticket-banner {
+      width: 100%;
+      height: 180px;
+      background-color: #1e1b2e;
+      overflow: hidden;
+    }
+    .ticket-banner img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .ticket-content {
+      padding: 30px;
+      position: relative;
+    }
+    .ticket-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 25px;
+      border-bottom: 1.5px dashed #ccc;
+      padding-bottom: 20px;
+    }
+    .ticket-title h1 {
+      font-size: 1.6rem;
+      margin: 0 0 8px 0;
+      color: #111;
+    }
+    .ticket-title p {
+      margin: 0;
+      color: #666;
+      font-size: 0.9rem;
+    }
+    .ticket-badge {
+      background: #e50914;
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+    .ticket-details-grid {
+      display: grid;
+      grid-template-columns: 2.2fr 1fr;
+      gap: 30px;
+    }
+    .info-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .info-item label {
+      display: block;
+      font-size: 0.75rem;
+      color: #888;
+      text-transform: uppercase;
+      font-weight: bold;
+      margin-bottom: 2px;
+    }
+    .info-item span {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #222;
+    }
+    .qr-side {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .qr-side img {
+      width: 150px;
+      height: 150px;
+      border: 1px solid #eee;
+      padding: 5px;
+      background: #fff;
+    }
+    .qr-side span {
+      font-size: 0.75rem;
+      color: #666;
+      margin-top: 8px;
+      font-weight: bold;
+    }
+    .print-bar {
+      margin-top: 25px;
+      text-align: center;
+    }
+    .print-btn {
+      background: #222;
+      color: #fff;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    
+    @media print {
+      body {
+        background: #fff;
+        padding: 0;
+      }
+      .ticket-container {
+        box-shadow: none;
+        border: none;
+        width: 100%;
+      }
+      .print-bar {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div>
+  <div class="ticket-container">
+    <div class="ticket-banner">
+      <img src="<%= String(booking.banner_image).startsWith('data:') ? booking.banner_image : '/uploads/' + booking.banner_image %>" alt="Event Banner" onerror="this.src='https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600'">
+    </div>
+    
+    <div class="ticket-content">
+      <div class="ticket-header">
+        <div class="ticket-title">
+          <h1><%= booking.event_title %></h1>
+          <p>Official Entry Ticket Pass</p>
+        </div>
+        <span class="ticket-badge">Paid</span>
+      </div>
+      
+      <div class="ticket-details-grid">
+        <div class="info-list">
+          <div class="info-item">
+            <label>Attendee Name</label>
+            <span><%= booking.user_name %></span>
+          </div>
+          <div class="info-item">
+            <label>Date & Time</label>
+            <span><%= new Date(booking.start_date).toLocaleString('en-IN') %></span>
+          </div>
+          <div class="info-item">
+            <label>Venue Location</label>
+            <span><%= booking.venue_name %>, <%= booking.city %></span>
+          </div>
+          <div class="info-item">
+            <label>Ticket Tier & Qty</label>
+            <span><%= booking.ticket_name %> (Qty: <%= booking.quantity %>)</span>
+          </div>
+          <div class="info-item">
+            <label>Booking ID Reference</label>
+            <span>#ES-<%= booking.id %></span>
+          </div>
+        </div>
+        
+        <div class="qr-side">
+          <img src="<%= booking.qr_code %>" alt="QR Code">
+          <span>SCAN TO ENTRY</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="print-bar">
+    <button class="print-btn" onclick="window.print()">Print Ticket PDF</button>
+  </div>
+</div>
+
+</body>
+</html>

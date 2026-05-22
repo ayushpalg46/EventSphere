@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EventSphere — End-to-End Event Management & Ticketing</title>
+  
+  <!-- Sora Font for futuristic tech vibe -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons for modern aesthetic -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+
+
+<header>
+  <div class="nav-container">
+    <div class="nav-left">
+      <a href="/" class="logo">
+        <i class="fa-solid fa-circle-nodes"></i> EventSphere
+      </a>
+      <ul class="nav-menu">
+        <li><a href="/" class="nav-link"><i class="fa-solid fa-house"></i> Home</a></li>
+        <li><a href="/events" class="nav-link"><i class="fa-solid fa-calendar-days"></i> Browse Events</a></li>
+        <li><a href="/help" class="nav-link"><i class="fa-solid fa-headset"></i> Support Helpline</a></li>
+      </ul>
+    </div>
+    
+    <div class="nav-right">
+      <div class="nav-actions">
+        <% if (user) { %>
+          <!-- Logged In Quick Actions -->
+          <% if (user.role === 'organiser') { %>
+            <a href="/organiser/create-event" class="btn btn-primary nav-action-btn"><i class="fa-solid fa-calendar-plus"></i> Create Event</a>
+            <a href="/organiser/dashboard" class="btn btn-secondary nav-action-btn"><i class="fa-solid fa-gauge"></i> Panel</a>
+          <% } else { %>
+            <a href="/events" class="btn btn-primary nav-action-btn"><i class="fa-solid fa-ticket"></i> Book Tickets</a>
+            <a href="/user/dashboard" class="btn btn-secondary nav-action-btn"><i class="fa-solid fa-table-list"></i> My Tickets</a>
+          <% } %>
+          
+          <div class="user-badge">
+            <i class="fa-solid fa-user-astronaut"></i>
+            <%= user.name.split(' ')[0] %>
+            <span class="role-tag"><%= user.role %></span>
+          </div>
+          
+          <a href="/logout" class="btn btn-logout" title="Logout"><i class="fa-solid fa-right-from-bracket"></i></a>
+        <% } else { %>
+          <!-- Guest Quick Actions -->
+          <a href="/login" class="nav-link"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
+          <a href="/register" class="btn btn-secondary nav-action-btn"><i class="fa-solid fa-user-plus"></i> Register</a>
+          <a href="/events" class="btn btn-primary nav-action-btn"><i class="fa-solid fa-ticket"></i> Book Tickets</a>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</header>

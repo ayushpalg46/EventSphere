@@ -1,0 +1,160 @@
+<%- include('../partials/header') %>
+
+<main class="container" style="max-width: 860px; padding: 60px 20px;">
+
+  <!-- Hero -->
+  <div style="text-align:center; margin-bottom: 56px;">
+    <div style="display:inline-flex; align-items:center; gap:12px; background:rgba(66,133,244,0.08); border:1px solid rgba(66,133,244,0.18); border-radius:50px; padding:8px 20px; margin-bottom:24px;">
+      <i class="fa-solid fa-shield-halved" style="color:#4285F4;"></i>
+      <span style="font-size:0.85rem; color:#4285F4; font-weight:600; letter-spacing:0.06em; text-transform:uppercase;">Legal</span>
+    </div>
+    <h1 style="font-size:clamp(2rem,5vw,3rem); font-weight:800; line-height:1.15; margin-bottom:16px; background: linear-gradient(135deg,#EA4335 0%,#FBBC04 35%,#34A853 65%,#4285F4 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Privacy Policy</h1>
+    <p style="color:var(--text-muted); font-size:1.05rem; max-width:560px; margin:0 auto;">Last updated: <strong style="color:var(--text-main);">May 2026</strong> &nbsp;·&nbsp; EventSphere Platform v2.0</p>
+  </div>
+
+  <!-- TOC -->
+  <div class="dashboard-card" style="padding:24px 32px; margin-bottom:40px; border-left:3px solid #4285F4;">
+    <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:14px; text-transform:uppercase; letter-spacing:0.06em; font-weight:600;">Contents</p>
+    <ol style="margin:0; padding-left:20px; line-height:2; color:var(--text-muted);">
+      <li><a href="#s1" style="color:#4285F4;">Information We Collect</a></li>
+      <li><a href="#s2" style="color:#4285F4;">How We Use Your Information</a></li>
+      <li><a href="#s3" style="color:#4285F4;">Cookies &amp; Tracking</a></li>
+      <li><a href="#s4" style="color:#4285F4;">Data Sharing</a></li>
+      <li><a href="#s5" style="color:#4285F4;">Data Security</a></li>
+      <li><a href="#s6" style="color:#4285F4;">Your Rights</a></li>
+      <li><a href="#s7" style="color:#4285F4;">Children's Privacy</a></li>
+      <li><a href="#s8" style="color:#4285F4;">Contact</a></li>
+    </ol>
+  </div>
+
+  <!-- Intro -->
+  <div class="dashboard-card" style="padding:32px; margin-bottom:28px;">
+    <p style="color:var(--text-muted); line-height:1.85; font-size:1rem;">
+      Welcome to <strong style="color:var(--text-main);">EventSphere</strong>. We are committed to protecting your personal information and your right to privacy. This Privacy Policy explains what information we collect, why we collect it, and how you can update, manage, export, and delete it. By using EventSphere, you agree to the terms in this policy.
+    </p>
+  </div>
+
+  <!-- Sections -->
+  <% const sections = [
+    {
+      id: 's1',
+      icon: 'fa-database',
+      color: '#4285F4',
+      title: '1. Information We Collect',
+      content: [
+        '<strong>Account information:</strong> When you register, we collect your name, email address, and a hashed password. Organisers may also provide additional profile details.',
+        '<strong>Event & booking data:</strong> When you book tickets, we store which events you attended, ticket quantities, ticket tier, and your unique QR token.',
+        '<strong>Payment data:</strong> EventSphere uses a <em>sandbox payment simulator</em>. No real card numbers are ever processed or stored on our servers.',
+        '<strong>Usage data:</strong> We log page visits, browser type, and general device information to improve platform performance.'
+      ]
+    },
+    {
+      id: 's2',
+      icon: 'fa-bullseye',
+      color: '#EA4335',
+      title: '2. How We Use Your Information',
+      content: [
+        'To create and manage your EventSphere account.',
+        'To process your ticket bookings and generate QR-code entry passes.',
+        'To send transactional emails such as booking confirmations and post-event feedback requests.',
+        'To display personalised event recommendations (based on your category preferences and wishlist).',
+        'To help organisers manage check-in and view anonymised attendance statistics.'
+      ]
+    },
+    {
+      id: 's3',
+      icon: 'fa-cookie-bite',
+      color: '#FBBC04',
+      title: '3. Cookies & Tracking',
+      content: [
+        '<strong>Session cookies:</strong> We use one essential session cookie (<code>connect.sid</code>) to keep you logged in. This cookie expires when you close your browser or click Logout.',
+        '<strong>No third-party ad trackers:</strong> EventSphere does not embed Google Ads, Meta Pixel, or any advertising trackers.',
+        'You can disable cookies in your browser settings, but core functionality (login, booking) will not work without session cookies.'
+      ]
+    },
+    {
+      id: 's4',
+      icon: 'fa-share-nodes',
+      color: '#34A853',
+      title: '4. Data Sharing',
+      content: [
+        'We do <strong>not</strong> sell, rent, or trade your personal information to third parties.',
+        '<strong>Event organisers</strong> can see the name, email, and check-in status of attendees for their own events — no other attendee data is shared.',
+        '<strong>Google Gemini API</strong> is used for the AI description generator feature. Text prompts submitted by organisers may be processed by Google\'s API; no personal attendee data is sent.',
+        'We may disclose information if required by law or to protect the rights and safety of EventSphere users.'
+      ]
+    },
+    {
+      id: 's5',
+      icon: 'fa-lock',
+      color: '#4285F4',
+      title: '5. Data Security',
+      content: [
+        'Passwords are hashed using <strong>bcrypt</strong> (12 salt rounds) and never stored in plain text.',
+        'All production communication uses <strong>HTTPS / TLS</strong>.',
+        'Database credentials and API keys are stored in environment variables and never committed to the public repository.',
+        'While we implement strong security measures, no internet transmission is 100% secure. Please use a strong, unique password for your account.'
+      ]
+    },
+    {
+      id: 's6',
+      icon: 'fa-user-shield',
+      color: '#EA4335',
+      title: '6. Your Rights',
+      content: [
+        '<strong>Access:</strong> You can view all your account data, tickets, and bookings from your dashboard at any time.',
+        '<strong>Correction:</strong> You can update your profile information from your account settings.',
+        '<strong>Deletion:</strong> You can request full account deletion by contacting the developer. We will remove your personal data within 30 days.',
+        '<strong>Portability:</strong> Organisers can export attendee lists as CSV from the organiser dashboard.'
+      ]
+    },
+    {
+      id: 's7',
+      icon: 'fa-child',
+      color: '#FBBC04',
+      title: '7. Children\'s Privacy',
+      content: [
+        'EventSphere is not directed at children under the age of 13.',
+        'We do not knowingly collect personal information from children. If you believe a child has provided us with their information, please contact us and we will promptly delete the data.'
+      ]
+    },
+    {
+      id: 's8',
+      icon: 'fa-envelope',
+      color: '#34A853',
+      title: '8. Contact',
+      content: [
+        'If you have any questions about this Privacy Policy or wish to exercise your data rights, please contact either developer:',
+        '<strong>Ayush G. Pal</strong> (Lead Developer)<br>Email: <a href="mailto:ayushpal.g.46@gmail.com" style="color:#4285F4;">ayushpal.g.46@gmail.com</a> &nbsp;·&nbsp; <a href="https://github.com/ayushpalg46" target="_blank" style="color:#4285F4;">GitHub</a> &nbsp;·&nbsp; <a href="https://www.linkedin.com/in/ayush-pal-46apg/" target="_blank" style="color:#4285F4;">LinkedIn</a>',
+        '<strong>Tanish Sunil Kotian</strong> (Co-Developer)<br>Email: <a href="mailto:tanishkotian3101@gmail.com" style="color:#EA4335;">tanishkotian3101@gmail.com</a> &nbsp;·&nbsp; <a href="https://github.com/Tanish210" target="_blank" style="color:#EA4335;">GitHub</a> &nbsp;·&nbsp; <a href="https://www.linkedin.com/in/tanish-kotian-0337a1394/" target="_blank" style="color:#EA4335;">LinkedIn</a>'
+      ]
+    }
+  ] %>
+
+  <% sections.forEach(s => { %>
+    <div class="dashboard-card" id="<%= s.id %>" style="padding:32px; margin-bottom:24px; border-left:3px solid <%= s.color %>; scroll-margin-top:80px;">
+      <h2 style="font-size:1.2rem; font-weight:700; margin-bottom:18px; display:flex; align-items:center; gap:12px;">
+        <span style="width:34px; height:34px; border-radius:8px; background:rgba(<%= s.color === '#4285F4' ? '66,133,244' : s.color === '#EA4335' ? '234,67,53' : s.color === '#FBBC04' ? '251,188,4' : '52,168,83' %>,0.12); display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;">
+          <i class="fa-solid <%= s.icon %>" style="color:<%= s.color %>; font-size:0.85rem;"></i>
+        </span>
+        <span><%= s.title %></span>
+      </h2>
+      <ul style="margin:0; padding-left:20px; line-height:1.9; color:var(--text-muted); font-size:0.97rem;">
+        <% s.content.forEach(c => { %>
+          <li style="margin-bottom:6px;"><%- c %></li>
+        <% }) %>
+      </ul>
+    </div>
+  <% }) %>
+
+  <!-- Back to top / nav links -->
+  <div style="display:flex; gap:16px; justify-content:center; margin-top:48px; flex-wrap:wrap;">
+    <a href="/help" class="btn btn-secondary"><i class="fa-solid fa-headset"></i> Support</a>
+    <a href="/docs" class="btn btn-secondary"><i class="fa-solid fa-book-open"></i> Documentation</a>
+    <a href="/contact" class="btn btn-secondary"><i class="fa-solid fa-code"></i> Contact Developer</a>
+    <a href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;" class="btn btn-primary"><i class="fa-solid fa-arrow-up"></i> Back to Top</a>
+  </div>
+
+</main>
+
+<%- include('../partials/footer') %>

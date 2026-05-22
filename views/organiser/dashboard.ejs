@@ -1,0 +1,144 @@
+<%- include('../partials/header') %>
+
+<main class="container">
+  
+  <div class="dashboard-layout">
+    
+    <!-- Sidebar -->
+    <%- include('../partials/sidebar') %>
+    
+    <!-- Panel Content -->
+    <div class="dashboard-content">
+      
+      <div class="dashboard-title-row">
+        <h1>Organiser Dashboard</h1>
+        <a href="/organiser/create-event" class="btn btn-primary"><i class="fa-solid fa-calendar-plus"></i> Create New Event</a>
+      </div>
+
+      <!-- Stats Metrics Cards Row -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-calendar-check"></i></div>
+          <div class="stat-details">
+            <h3><%= stats.event_count || 0 %></h3>
+            <p>Total Events</p>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-ticket-simple"></i></div>
+          <div class="stat-details">
+            <h3><%= stats.total_tickets_sold || 0 %></h3>
+            <p>Tickets Sold</p>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+          <div class="stat-details">
+            <h3><%= stats.total_revenue || 0 %></h3>
+            <p>Gross Revenue</p>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-user-check"></i></div>
+          <div class="stat-details">
+            <h3><%= stats.total_checked_in || 0 %></h3>
+            <p>Total Checked In</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Events List Created by Organiser -->
+      <div class="dashboard-card">
+        <h3 class="dashboard-card-title"><i class="fa-solid fa-list-check" style="color: var(--accent-color);"></i> My Listed Events</h3>
+        
+        <% if (events && events.length > 0) { %>
+          <div class="table-responsive">
+            <table class="dashboard-table">
+              <thead>
+                <tr>
+                  <th>Event Name</th>
+                  <th>Category</th>
+                  <th>Date & Time</th>
+                  <th>City</th>
+                  <th>Tickets Sold</th>
+                  <th>Status</th>
+                  <th style="text-align: right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% events.forEach(event => { %>
+                  <tr>
+                    <td>
+                      <strong><%= event.title %></strong>
+                      <br />
+                      <span style="font-size: 0.8rem; color: var(--text-muted);"><%= event.venue_name %></span>
+                    </td>
+                    <td><%= event.category %></td>
+                    <td><%= new Date(event.start_date).toLocaleDateString('en-IN') %></td>
+                    <td><%= event.city %></td>
+                    <td>
+                      <strong><%= event.total_sold || 0 %></strong> / <%= event.total_capacity || 0 %>
+                    </td>
+                    <td>
+                      <span class="badge badge-<%= event.status === 'upcoming' ? 'pending' : (event.status === 'live' ? 'paid' : 'failed') %>">
+                        <%= event.status.toUpperCase() %>
+                      </span>
+                    </td>
+                    <td style="text-align: right; display: flex; gap: 8px; justify-content: flex-end;">
+                      <a href="/organiser/events/<%= event.id %>" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;"><i class="fa-solid fa-sliders"></i> Manage</a>
+                      <a href="/organiser/checkin/<%= event.id %>" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem; background: var(--success-color);"><i class="fa-solid fa-qrcode"></i> Check-in</a>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        <% } else { %>
+          <p style="color: var(--text-muted); text-align: center; padding: 20px;">You haven't listed any events yet. Create one to get started!</p>
+        <% } %>
+      </div>
+
+      <!-- Payouts Table Simulation -->
+      <div class="dashboard-card">
+        <h3 class="dashboard-card-title"><i class="fa-solid fa-money-bill-transfer" style="color: var(--success-color);"></i> Payouts Simulation</h3>
+        
+        <% if (payouts && payouts.length > 0) { %>
+          <div class="table-responsive">
+            <table class="dashboard-table">
+              <thead>
+                <tr>
+                  <th>Payout ID</th>
+                  <th>Event Name</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Processed Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% payouts.forEach(pay => { %>
+                  <tr>
+                    <td>#PAY-<%= pay.id %></td>
+                    <td><%= pay.event_title %></td>
+                    <td>Rs. <%= pay.amount %></td>
+                    <td><span class="badge badge-paid"><%= pay.status.toUpperCase() %></span></td>
+                    <td><%= new Date(pay.payout_date).toLocaleString('en-IN') %></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        <% } else { %>
+          <p style="color: var(--text-muted); text-align: center; padding: 10px; font-size: 0.9rem;">No payouts processed yet. You can request payouts from individual event management pages.</p>
+        <% } %>
+      </div>
+
+    </div>
+
+  </div>
+
+</main>
+
+<%- include('../partials/footer') %>

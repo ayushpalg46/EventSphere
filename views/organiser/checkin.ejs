@@ -1,0 +1,492 @@
+<%- include('../partials/header') %>
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+<style>
+  /* Custom scanning container styling */
+  .scanner-wrapper {
+    position: relative;
+    width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  }
+  
+  #qr-reader {
+    width: 100% !important;
+    border: none !important;
+    background: transparent !important;
+  }
+  
+  #qr-reader video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+
+  /* Scan laser line animation */
+  @keyframes scan-anim {
+    0% { top: 5%; }
+    50% { top: 95%; }
+    100% { top: 5%; }
+  }
+
+  /* Controls layout */
+  #camera-select {
+    transition: all 0.3s ease;
+  }
+  #camera-select:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 10px rgba(168, 85, 247, 0.2);
+  }
+</style>
+
+<main class="container">
+  
+  <div class="dashboard-layout">
+    
+    <!-- Sidebar -->
+    <%- include('../partials/sidebar') %>
+    
+    <!-- Panel Content -->
+    <div class="dashboard-content">
+      
+      <!-- Back button -->
+      <a href="/organiser/events/<%= event.id %>" style="color: var(--text-muted); font-size: 0.9rem; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 20px;">
+        <i class="fa-solid fa-arrow-left"></i> Back to Event Manager
+      </a>
+
+      <div class="dashboard-title-row">
+        <h1>Check-in Desk: <%= event.title %></h1>
+        <span class="badge badge-paid" style="padding: 8px 12px;"><i class="fa-solid fa-signal"></i> Live Syncing</span>
+      </div>
+
+      <!-- Live statistics + Manual entries -->
+      <div class="live-checkin-wrapper">
+        
+        <!-- Column 1: Live Counters -->
+        <div class="dashboard-card" style="text-align: center;">
+          <h3 class="dashboard-card-title" style="justify-content: center;">Live Check-in Counter</h3>
+          
+          <div class="live-counter-circle">
+            <h2 id="live-checkin-count"><%= stats.total_checked_in %></h2>
+            <p>Checked In</p>
+          </div>
+
+          <div style="display: flex; justify-content: center; gap: 30px; margin-top: 20px;">
+            <div>
+              <h4 style="font-size: 1.5rem; font-weight: 700;"><%= stats.total_registered %></h4>
+              <p style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">Total Booked</p>
+            </div>
+            <div>
+              <h4 id="live-percentage" style="font-size: 1.5rem; font-weight: 700; color: var(--accent-color);">
+                <%= stats.total_registered > 0 ? Math.round((stats.total_checked_in / stats.total_registered) * 100) : 0 %>%
+              </h4>
+              <p style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">Attendance Rate</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 2: Check-In Scan simulation form -->
+        <div class="dashboard-card">
+          <h3 class="dashboard-card-title"><i class="fa-solid fa-qrcode" style="color: var(--accent-color);"></i> Scan Ticket QR Code</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">
+            Request camera permissions to activate the live scanner or input details manually.
+          </p>
+
+          <!-- AJAX/Live Camera Scan Feedback -->
+          <div id="scan-feedback" class="alert" style="display: none; margin-bottom: 20px;"></div>
+
+          <!-- HTML5 Live QR Code Camera Container & Overlay -->
+          <div class="scanner-wrapper" id="scanner-view-wrapper" style="position: relative; width: 100%; border-radius: 12px; overflow: hidden; background: rgba(0, 0, 0, 0.4); border: 1.5px dashed var(--border-color); margin-bottom: 15px; display: none;">
+            <div id="qr-reader" style="width: 100%; min-height: 250px;"></div>
+            <!-- Custom Scanning Reticle Overlay -->
+            <div class="scanner-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 2;">
+              <div class="scanner-box" style="width: 200px; height: 200px; border: 2px solid rgba(168, 85, 247, 0.6); border-radius: 12px; position: relative; box-shadow: 0 0 15px rgba(168, 85, 247, 0.4), 0 0 0 4000px rgba(0, 0, 0, 0.5);">
+                <!-- Glowing corner markers -->
+                <div class="scanner-corner tl" style="position: absolute; top: -2px; left: -2px; width: 15px; height: 15px; border-top: 4px solid #a855f7; border-left: 4px solid #a855f7; border-top-left-radius: 6px;"></div>
+                <div class="scanner-corner tr" style="position: absolute; top: -2px; right: -2px; width: 15px; height: 15px; border-top: 4px solid #a855f7; border-right: 4px solid #a855f7; border-top-right-radius: 6px;"></div>
+                <div class="scanner-corner bl" style="position: absolute; bottom: -2px; left: -2px; width: 15px; height: 15px; border-bottom: 4px solid #a855f7; border-left: 4px solid #a855f7; border-bottom-left-radius: 6px;"></div>
+                <div class="scanner-corner br" style="position: absolute; bottom: -2px; right: -2px; width: 15px; height: 15px; border-bottom: 4px solid #a855f7; border-right: 4px solid #a855f7; border-bottom-right-radius: 6px;"></div>
+                <!-- Glowing laser line -->
+                <div class="scanner-laser" style="position: absolute; left: 5%; right: 5%; height: 2px; background: linear-gradient(90deg, transparent, #a855f7, transparent); box-shadow: 0 0 8px #a855f7; animation: scan-anim 2s linear infinite;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Custom Scanner Controls -->
+          <div class="scanner-controls" style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
+            <button type="button" id="start-camera-btn" class="btn btn-secondary" style="flex: 1; padding: 12px; background: rgba(168, 85, 247, 0.1); border-color: rgba(168, 85, 247, 0.2); color: #a855f7; font-weight: 600;">
+              <i class="fa-solid fa-camera"></i> Start Camera QR Scanner
+            </button>
+            <button type="button" id="stop-camera-btn" class="btn btn-danger" style="display: none; flex: 1; padding: 12px; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: #ef4444; font-weight: 600;">
+              <i class="fa-solid fa-circle-xmark"></i> Stop Camera Scanner
+            </button>
+            <select id="camera-select" class="form-control" style="display: none; flex: 1; min-width: 150px; background: var(--bg-secondary); color: white; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px;">
+              <option value="">Selecting Camera...</option>
+            </select>
+          </div>
+
+          <!-- Last Scanned Attendee Preview Card -->
+          <div id="scanned-preview-card" style="display: none; margin-top: 20px; padding: 15px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); border-radius: 12px; transition: all 0.3s ease;">
+            <p style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Last Scanned Attendee</p>
+            <div style="display: flex; gap: 15px; align-items: center;">
+              <img id="preview-avatar" src="/images/default-avatar.png" alt="Attendee Avatar" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--accent-color);">
+              <div style="flex: 1; min-width: 0;">
+                <h4 id="preview-name" style="font-size: 1.05rem; font-weight: 600; margin: 0 0 3px 0; color: white;">John Doe</h4>
+                <p id="preview-email" style="font-size: 0.8rem; color: var(--text-muted); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">john@example.com</p>
+              </div>
+              <div style="text-align: right;">
+                <span id="preview-badge" class="badge badge-paid">VIP</span>
+                <p id="preview-qty" style="font-size: 0.75rem; color: var(--text-muted); margin: 4px 0 0 0;">Qty: 1</p>
+              </div>
+            </div>
+            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border-color); display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem;">
+              <span id="preview-status" style="font-weight: 600; color: #10b981;"><i class="fa-solid fa-circle-check"></i> Checked-In</span>
+              <span id="preview-time" style="color: var(--text-muted);"><i class="fa-regular fa-clock"></i> 12:34 PM</span>
+            </div>
+          </div>
+
+          <% if (error) { %>
+            <div class="alert alert-danger" style="margin-bottom: 20px;">
+              <i class="fa-solid fa-circle-exclamation"></i> <%= error %>
+            </div>
+          <% } %>
+
+          <% if (success) { %>
+            <div class="alert alert-success" style="margin-bottom: 20px;">
+              <i class="fa-solid fa-circle-check"></i> <%= success %>
+            </div>
+          <% } %>
+
+          <form action="/organiser/checkin/<%= event.id %>" method="POST" style="border-top: 1px solid var(--border-color); padding-top: 20px; margin-top: 20px;">
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 15px; font-weight: 600;">MANUAL VERIFICATION BACKUP</p>
+            <div class="form-group">
+              <label for="qrToken">Ticket Code / Booking ID</label>
+              <input type="text" id="qrToken" name="qrToken" class="form-control" placeholder="e.g. 2 or TICKET-1-1..." required autofocus style="background: var(--bg-primary);">
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; margin-top: 10px;">
+              Submit Verification Check <i class="fa-solid fa-circle-right"></i>
+            </button>
+          </form>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</main>
+
+<script>
+  const eventId = '<%= event.id %>';
+  const checkedInDisplay = document.getElementById('live-checkin-count');
+  const percentageDisplay = document.getElementById('live-percentage');
+  const scanFeedback = document.getElementById('scan-feedback');
+
+  // Short polling script to keep live count updated in real-time
+  async function pollStats() {
+    try {
+      const res = await fetch(`/organiser/checkin/${eventId}/stats`);
+      if (res.ok) {
+        const stats = await res.json();
+        updateStatsUI(stats);
+      }
+    } catch (err) {
+      console.log('Stats polling error:', err);
+    }
+  }
+  setInterval(pollStats, 3000);
+
+  function updateStatsUI(stats) {
+    if (checkedInDisplay) checkedInDisplay.textContent = stats.total_checked_in;
+    const reg = parseInt(stats.total_registered) || 0;
+    const checked = parseInt(stats.total_checked_in) || 0;
+    const rate = reg > 0 ? Math.round((checked / reg) * 100) : 0;
+    if (percentageDisplay) percentageDisplay.textContent = `${rate}%`;
+  }
+
+  // Play audio beep tone on successful scan
+  function playBeep() {
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(1000, audioCtx.currentTime); // 1000Hz tone
+      gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.12); // fade out
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      
+      oscillator.start();
+      oscillator.stop(audioCtx.currentTime + 0.12);
+    } catch (e) {
+      console.log('Web Audio API sound blocked or not supported by browser security policy:', e);
+    }
+  }
+
+  // Update visual attendee preview card
+  function updatePreviewCard(booking, isError) {
+    const card = document.getElementById('scanned-preview-card');
+    if (!card || !booking) return;
+
+    document.getElementById('preview-avatar').src = booking.userProfilePic || '/images/default-avatar.png';
+    document.getElementById('preview-name').textContent = booking.userName;
+    document.getElementById('preview-email').textContent = booking.userEmail;
+    document.getElementById('preview-badge').textContent = booking.ticketName;
+    document.getElementById('preview-qty').textContent = `Qty: ${booking.quantity}`;
+
+    const statusEl = document.getElementById('preview-status');
+    if (isError) {
+      statusEl.style.color = '#ef4444';
+      statusEl.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> Already Checked-In`;
+      card.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+      card.style.boxShadow = '0 0 12px rgba(239, 68, 68, 0.15)';
+    } else {
+      statusEl.style.color = '#10b981';
+      statusEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> Checked-In`;
+      card.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+      card.style.boxShadow = '0 0 12px rgba(16, 185, 129, 0.15)';
+    }
+
+    const timeStr = booking.checkinTime ? new Date(booking.checkinTime).toLocaleTimeString() : new Date().toLocaleTimeString();
+    document.getElementById('preview-time').innerHTML = `<i class="fa-regular fa-clock"></i> ${timeStr}`;
+
+    card.style.display = 'block';
+    card.style.transform = 'scale(0.95)';
+    setTimeout(() => {
+      card.style.transform = 'scale(1)';
+    }, 50);
+  }
+
+  // Intercept manual ticket submission form using AJAX
+  document.addEventListener('DOMContentLoaded', () => {
+    const manualForm = document.querySelector('form');
+    if (manualForm) {
+      manualForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const qrTokenInput = document.getElementById('qrToken');
+        const token = qrTokenInput.value.trim();
+        if (!token) return;
+
+        showFeedback("Verifying manual check-in...", "alert-info", true);
+
+        try {
+          const response = await fetch(`/organiser/checkin/${eventId}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify({ qrToken: token })
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            showFeedback(`<i class="fa-solid fa-circle-check"></i> ${data.success}`, "alert-success");
+            playBeep();
+            updateStatsUI(data.stats);
+            updatePreviewCard(data.booking, false);
+            qrTokenInput.value = ''; // Clear input
+          } else {
+            showFeedback(`<i class="fa-solid fa-circle-exclamation"></i> ${data.error || "Verification failed."}`, "alert-danger");
+            if (data.booking) {
+              updatePreviewCard(data.booking, true);
+            }
+          }
+        } catch (err) {
+          console.error(err);
+          showFeedback("Network error connecting to verify ticket.", "alert-danger");
+        }
+      });
+    }
+  });
+
+  // --- RAW HTML5 Live Camera QR Scanner Logic ---
+  let html5Qrcode = null;
+  let isScanning = false;
+  let lastScannedToken = "";
+  let scanCooldown = false;
+
+  const startCameraBtn = document.getElementById('start-camera-btn');
+  const stopCameraBtn = document.getElementById('stop-camera-btn');
+  const cameraSelect = document.getElementById('camera-select');
+  const scannerViewWrapper = document.getElementById('scanner-view-wrapper');
+
+  if (startCameraBtn) {
+    startCameraBtn.addEventListener('click', startCamera);
+  }
+
+  if (stopCameraBtn) {
+    stopCameraBtn.addEventListener('click', stopCamera);
+  }
+
+  if (cameraSelect) {
+    cameraSelect.addEventListener('change', async (e) => {
+      const cameraId = e.target.value;
+      if (!cameraId || !isScanning) return;
+      
+      try {
+        await html5Qrcode.stop();
+        await runScanner(cameraId);
+      } catch (err) {
+        console.error("Failed to switch camera:", err);
+        showFeedback("Failed to switch camera source.", "alert-danger");
+      }
+    });
+  }
+
+  async function startCamera() {
+    if (isScanning) return;
+    
+    if (!html5Qrcode) {
+      html5Qrcode = new Html5Qrcode("qr-reader");
+    }
+
+    showFeedback("Requesting camera permissions...", "alert-info", true);
+
+    try {
+      const cameras = await Html5Qrcode.getCameras();
+      if (cameras && cameras.length > 0) {
+        // Populate dropdown
+        cameraSelect.innerHTML = '';
+        cameras.forEach((camera, index) => {
+          const option = document.createElement('option');
+          option.value = camera.id;
+          option.textContent = camera.label || `Camera ${index + 1}`;
+          cameraSelect.appendChild(option);
+        });
+        cameraSelect.style.display = 'block';
+
+        // Prefer rear camera
+        let selectedCameraId = cameras[0].id;
+        for (const cam of cameras) {
+          const label = cam.label.toLowerCase();
+          if (label.includes('back') || label.includes('environment') || label.includes('rear')) {
+            selectedCameraId = cam.id;
+            cameraSelect.value = selectedCameraId;
+            break;
+          }
+        }
+
+        await runScanner(selectedCameraId);
+      } else {
+        // Fallback constraint
+        await runScanner({ facingMode: "environment" });
+      }
+    } catch (err) {
+      console.warn("Device query failed, using facingMode fallback...", err);
+      try {
+        await runScanner({ facingMode: "environment" });
+      } catch (errFallback) {
+        console.error("Camera access completely blocked:", errFallback);
+        showFeedback("Camera access permission denied or camera device not found.", "alert-danger");
+        resetScannerUI();
+      }
+    }
+  }
+
+  async function runScanner(cameraSource) {
+    try {
+      scannerViewWrapper.style.display = 'block';
+      await html5Qrcode.start(
+        cameraSource,
+        {
+          fps: 10,
+          qrbox: { width: 200, height: 200 }
+        },
+        onScanSuccess,
+        onScanError
+      );
+      isScanning = true;
+      startCameraBtn.style.display = 'none';
+      stopCameraBtn.style.display = 'block';
+      showFeedback("Scanner active. Scan the attendee ticket QR code.", "alert-info");
+    } catch (err) {
+      console.error("Failed to start scanner:", err);
+      showFeedback("Failed to launch camera feed: " + err.message, "alert-danger");
+      resetScannerUI();
+    }
+  }
+
+  async function stopCamera() {
+    if (!html5Qrcode || !isScanning) return;
+    try {
+      await html5Qrcode.stop();
+    } catch (err) {
+      console.error("Error stopping scanner:", err);
+    } finally {
+      isScanning = false;
+      resetScannerUI();
+    }
+  }
+
+  function resetScannerUI() {
+    scannerViewWrapper.style.display = 'none';
+    startCameraBtn.style.display = 'block';
+    stopCameraBtn.style.display = 'none';
+    cameraSelect.style.display = 'none';
+  }
+
+  async function onScanSuccess(decodedText, decodedResult) {
+    if (scanCooldown || decodedText === lastScannedToken) return;
+
+    scanCooldown = true;
+    lastScannedToken = decodedText;
+    playBeep();
+
+    showFeedback("Scanned QR! Verifying ticket...", "alert-success", true);
+
+    try {
+      const response = await fetch(`/organiser/checkin/${eventId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ qrToken: decodedText })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        showFeedback(`<i class="fa-solid fa-circle-check"></i> ${data.success}`, "alert-success");
+        updateStatsUI(data.stats);
+        updatePreviewCard(data.booking, false);
+      } else {
+        showFeedback(`<i class="fa-solid fa-circle-exclamation"></i> ${data.error || "Verification failed."}`, "alert-danger");
+        if (data.booking) {
+          updatePreviewCard(data.booking, true);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      showFeedback("Network error connecting to verify ticket.", "alert-danger");
+    } finally {
+      setTimeout(() => {
+        scanCooldown = false;
+        lastScannedToken = "";
+      }, 3000);
+    }
+  }
+
+  function onScanError(errorMessage) {
+    // Noise/scanning logs are ignored to avoid browser console pollution
+  }
+
+  function showFeedback(msg, className, isProcessing = false) {
+    if (!scanFeedback) return;
+    scanFeedback.className = `alert ${className}`;
+    scanFeedback.innerHTML = isProcessing ? `<i class="fa-solid fa-circle-notch fa-spin"></i> ${msg}` : msg;
+    scanFeedback.style.display = 'block';
+  }
+</script>
+
+<%- include('../partials/footer') %>

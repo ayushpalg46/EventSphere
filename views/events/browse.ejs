@@ -1,0 +1,128 @@
+<%- include('../partials/header') %>
+
+<main class="container">
+  
+  <div class="dashboard-title-row" style="margin-bottom: 20px;">
+    <h1>Explore Events</h1>
+  </div>
+
+  <!-- Browse Page Filter Form -->
+  <form action="/events" method="GET" class="dashboard-card" style="padding: 20px; margin-bottom: 40px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; align-items: flex-end;">
+      
+      <div class="form-group" style="margin-bottom: 0;">
+        <label for="search-inp">Search Keyword</label>
+        <input type="text" id="search-inp" name="search" class="form-control" placeholder="Event title..." value="<%= filters.search || '' %>">
+      </div>
+
+      <div class="form-group" style="margin-bottom: 0;">
+        <label for="cat-select">Category</label>
+        <select id="cat-select" name="category" class="form-control" style="background: var(--bg-secondary); color: white;">
+          <option value="">All Categories</option>
+          <% categories.forEach(cat => { %>
+            <option value="<%= cat %>" <%= filters.category === cat ? 'selected' : '' %>><%= cat %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 0;">
+        <label for="city-select">City</label>
+        <select id="city-select" name="city" class="form-control" style="background: var(--bg-secondary); color: white;">
+          <option value="">All Cities</option>
+          <option value="Online" <%= filters.city === 'Online' ? 'selected' : '' %>>Online</option>
+          <% cities.forEach(ct => { %>
+            <% if (ct !== 'Online') { %>
+              <option value="<%= ct %>" <%= filters.city === ct ? 'selected' : '' %>><%= ct %></option>
+            <% } %>
+          <% }) %>
+        </select>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 0;">
+        <label for="price-select">Price</label>
+        <select id="price-select" name="price" class="form-control" style="background: var(--bg-secondary); color: white;">
+          <option value="">All Prices</option>
+          <option value="free" <%= filters.price === 'free' ? 'selected' : '' %>>Free Events</option>
+          <option value="paid" <%= filters.price === 'paid' ? 'selected' : '' %>>Paid Events</option>
+        </select>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 0;">
+        <label for="date-select">Timing</label>
+        <select id="date-select" name="date" class="form-control" style="background: var(--bg-secondary); color: white;">
+          <option value="">Any Time</option>
+          <option value="today" <%= filters.date === 'today' ? 'selected' : '' %>>Today</option>
+          <option value="tomorrow" <%= filters.date === 'tomorrow' ? 'selected' : '' %>>Tomorrow</option>
+          <option value="weekend" <%= filters.date === 'weekend' ? 'selected' : '' %>>This Weekend</option>
+          <option value="month" <%= filters.date === 'month' ? 'selected' : '' %>>Next 30 Days</option>
+        </select>
+      </div>
+
+      <div style="display: flex; gap: 10px;">
+        <button type="submit" class="btn btn-primary" style="flex: 1; padding: 12px;"><i class="fa-solid fa-filter"></i> Apply</button>
+        <a href="/events" class="btn btn-secondary" style="padding: 12px;"><i class="fa-solid fa-arrows-rotate"></i> Reset</a>
+      </div>
+
+    </div>
+  </form>
+
+  <!-- Events Listing Results Grid -->
+  <div class="event-grid">
+    <% if (events && events.length > 0) { %>
+      <% events.forEach(event => { %>
+        <div class="event-card" data-tilt>
+          <div class="event-banner-wrap">
+            <span class="event-category-tag"><%= event.category %></span>
+            <%
+              let fallbackImage = 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=600';
+              if (event.category === 'Music') fallbackImage = 'https://images.unsplash.com/photo-1506157786151-b8491531f063?w=600';
+              else if (event.category === 'Comedy') fallbackImage = 'https://images.unsplash.com/photo-1585647347483-22b66260dfff?w=600';
+              else if (event.category === 'Tech') fallbackImage = 'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?w=600';
+              else if (event.category === 'Movies') fallbackImage = 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=600';
+            %>
+            <img src="<%= String(event.banner_image).startsWith('data:') ? event.banner_image : '/uploads/' + event.banner_image %>" alt="<%= event.title %>" onerror="this.src='<%= fallbackImage %>'">
+          </div>
+          
+          <div class="event-card-body">
+            <h3><%= event.title %></h3>
+            
+            <div class="event-info-row">
+              <i class="fa-solid fa-calendar-day"></i>
+              <span><%= new Date(event.start_date).toLocaleDateString('en-IN', { weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) %></span>
+            </div>
+            
+            <div class="event-info-row">
+              <i class="fa-solid fa-location-dot"></i>
+              <span><%= event.venue_name %>, <%= event.city %></span>
+            </div>
+            
+            <div class="event-price-info">
+              <div>
+                <p class="price-lbl">Tickets From</p>
+                <p class="price-val">
+                  <% if (event.minPrice === 0) { %>
+                    Free
+                  <% } else if (event.minPrice) { %>
+                    Rs. <%= event.minPrice %>
+                  <% } else { %>
+                    Rs. 0
+                  <% } %>
+                </p>
+              </div>
+              <a href="/events/<%= event.id %>" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.85rem;">Details</a>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <div style="grid-column: 1/-1; text-align: center; padding: 60px; background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-color);">
+        <i class="fa-regular fa-calendar-times" style="font-size: 3rem; color: var(--accent-color); margin-bottom: 15px;"></i>
+        <h3 style="margin-bottom: 10px;">No Matching Events Found</h3>
+        <p style="color: var(--text-muted);">Try adjusting your search terms or filters to find events.</p>
+      </div>
+    <% } %>
+  </div>
+
+</main>
+
+<%- include('../partials/footer') %>

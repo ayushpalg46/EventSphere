@@ -1,0 +1,56 @@
+<%- include('../partials/header') %>
+
+<main class="container">
+  
+  <div class="confirmation-box">
+    <div class="confirmation-icon">
+      <i class="fa-solid fa-circle-check"></i>
+    </div>
+    
+    <h1 style="font-size: 2rem; font-weight: 800; margin-bottom: 8px;">Booking Confirmed!</h1>
+    <p style="color: var(--text-muted); font-size: 1rem;">Your transaction was successful. We have sent a confirmation email to your registered inbox.</p>
+    
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 15px;">
+      <strong>Sandbox Payment ID:</strong> <%= paymentId %>
+    </p>
+
+    <!-- Display all booked tickets in this order -->
+    <div style="margin-top: 30px; display: flex; flex-direction: column; gap: 20px;">
+      <% bookingsList.forEach(ticket => { %>
+        <div class="ticket-wrapper">
+          <div class="ticket-details">
+            <div class="ticket-info">
+              <span class="badge badge-paid" style="margin-bottom: 8px;">Paid Ticket</span>
+              <h4><%= ticket.event_title %></h4>
+              <p><strong>Ticket Tier:</strong> <%= ticket.ticket_name %></p>
+              <p><strong>Quantity:</strong> <%= ticket.quantity %> pass(es)</p>
+              <p><strong>Date/Time:</strong> <%= new Date(ticket.start_date).toLocaleString('en-IN') %></p>
+              <p><strong>Venue:</strong> <%= ticket.venue_name %>, <%= ticket.city %></p>
+              <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 10px;">Booking Ref: #ES-<%= ticket.id %></p>
+            </div>
+            
+            <div class="ticket-qr">
+              <!-- Render QR code generated as Base64 Data URL -->
+              <img src="<%= ticket.qr_code %>" alt="Check-in QR Code">
+              <p style="font-size: 0.7rem; text-align: center; color: #666; margin-top: 4px; font-weight: 600;">Scan at Entry</p>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+
+    <!-- Buttons -->
+    <div style="display: flex; gap: 15px; margin-top: 30px;">
+      <a href="/user/dashboard" class="btn btn-secondary" style="flex: 1;"><i class="fa-solid fa-gauge"></i> Go to Dashboard</a>
+      <button onclick="window.print()" class="btn btn-primary" style="flex: 1;"><i class="fa-solid fa-print"></i> Print Tickets</button>
+    </div>
+
+    <!-- Simulated email file checker warning for developers -->
+    <div style="margin-top: 25px; border-top: 1px solid var(--border-color); padding-top: 15px; font-size: 0.8rem; color: var(--text-muted);">
+      <p><i class="fa-solid fa-envelope-open-text"></i> Running in simulator? Check your local mailbox logs in terminal or look inside <code style="background: rgba(255,255,255,0.05); padding: 2px 4px; border-radius: 4px;">scratch/simulated_emails/</code> folder to inspect the generated HTML mail!</p>
+    </div>
+  </div>
+
+</main>
+
+<%- include('../partials/footer') %>

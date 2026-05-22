@@ -1,0 +1,123 @@
+<%- include('../partials/header') %>
+
+<main class="container" style="max-width:900px; padding:60px 20px;">
+
+  <!-- Hero -->
+  <div style="text-align:center; margin-bottom:56px;">
+    <div style="display:inline-flex; align-items:center; gap:12px; background:rgba(251,188,4,0.08); border:1px solid rgba(251,188,4,0.20); border-radius:50px; padding:8px 20px; margin-bottom:24px;">
+      <i class="fa-solid fa-book-open" style="color:#FBBC04;"></i>
+      <span style="font-size:0.85rem; color:#FBBC04; font-weight:600; letter-spacing:0.06em; text-transform:uppercase;">Docs</span>
+    </div>
+    <h1 style="font-size:clamp(2rem,5vw,3rem); font-weight:800; margin-bottom:16px; background:linear-gradient(135deg,#EA4335 0%,#FBBC04 35%,#34A853 65%,#4285F4 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Documentation</h1>
+    <p style="color:var(--text-muted); font-size:1.05rem; max-width:580px; margin:0 auto;">Everything you need to know about using EventSphere — as an attendee or an organiser.</p>
+  </div>
+
+  <!-- Cards grid -->
+  <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:24px; margin-bottom:48px;">
+    <% const quickCards = [
+      { icon:'fa-user-plus', color:'#4285F4', title:'Getting Started', desc:'Create an account, set up your profile, and browse events in under 2 minutes.', anchor:'#attendee' },
+      { icon:'fa-ticket', color:'#EA4335', title:'Booking Tickets', desc:'How to find events, select ticket tiers, apply discount codes, and complete checkout.', anchor:'#booking' },
+      { icon:'fa-calendar-plus', color:'#FBBC04', title:'Creating Events', desc:'Organiser guide: create event listings, set ticket types, upload a banner image.', anchor:'#organiser' },
+      { icon:'fa-qrcode', color:'#34A853', title:'QR Check-In', desc:'How the live QR scanning check-in panel works on event day.', anchor:'#checkin' }
+    ] %>
+    <% quickCards.forEach(c => { %>
+      <a href="<%= c.anchor %>" style="text-decoration:none;">
+        <div class="dashboard-card" style="padding:28px; cursor:pointer; transition:transform 0.25s,border-color 0.25s; border:1px solid var(--border-color);" onmouseover="this.style.borderColor='<%= c.color %>30';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='';this.style.transform=''">
+          <div style="width:44px;height:44px;border-radius:12px;background:rgba(0,0,0,0.3);border:1px solid <%= c.color %>30;display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
+            <i class="fa-solid <%= c.icon %>" style="color:<%= c.color %>; font-size:1.1rem;"></i>
+          </div>
+          <h3 style="font-size:1rem; font-weight:700; margin-bottom:8px; color:var(--text-main);"><%= c.title %></h3>
+          <p style="font-size:0.88rem; color:var(--text-muted); line-height:1.6; margin:0;"><%= c.desc %></p>
+        </div>
+      </a>
+    <% }) %>
+  </div>
+
+  <%
+  const docSections = [
+    {
+      id: 'attendee',
+      color: '#4285F4',
+      icon: 'fa-user',
+      title: 'Attendee Guide',
+      steps: [
+        { n:'1', title:'Register an Account', body:'Click <strong>Register</strong> in the nav bar. Fill in your name, email, and a strong password. Choose the <em>Attendee</em> role. Your account is created instantly — no email verification required in the demo build.' },
+        { n:'2', title:'Browse & Find Events', body:'Click <strong>Browse Events</strong>. Use the filter bar to narrow by <em>category</em>, <em>date</em>, <em>city</em>, or <em>price</em> (free / paid). Click any event card to see the full detail page — agenda, speakers, FAQ, and venue map.' },
+        { n:'3', title:'Buy or Register for Tickets', body:'On the event detail page, choose your ticket tier (General / VIP / Early Bird if available), enter quantity, and click <strong>Book Now</strong>. A sandbox Stripe-style payment screen will appear for paid events. Confirm to complete booking.' },
+        { n:'4', title:'View Your QR Ticket', body:'Go to <strong>My Dashboard → My Tickets</strong>. Each booking shows a QR code — tap to enlarge. This is scanned by the organiser at the entry desk.' },
+        { n:'5', title:'Wishlist & Reminders', body:'Tap the <i class="fa-regular fa-heart"></i> icon on any event card to add it to your wishlist. Wishlisted events appear in <strong>My Dashboard → Wishlist</strong> with countdown timers.' }
+      ]
+    },
+    {
+      id: 'booking',
+      color: '#EA4335',
+      icon: 'fa-credit-card',
+      title: 'Payments & Booking',
+      steps: [
+        { n:'!', title:'Sandbox Mode', body:'All payments in EventSphere are <strong>simulated</strong>. No real money changes hands. You can use any card number in the payment form — it will always succeed in demo mode.' },
+        { n:'1', title:'Discount Codes', body:'If an organiser has set a discount code for an event, enter it in the <strong>Promo Code</strong> field on the booking page. Valid codes are applied instantly and the discounted price is shown before confirmation.' },
+        { n:'2', title:'Early Bird Pricing', body:'Some events have Early Bird tiers with an expiry date. If the Early Bird window has not yet closed, it will appear as a selectable tier at checkout.' },
+        { n:'3', title:'Refund Requests', body:'Go to <strong>My Dashboard → My Tickets</strong>, find the booking, and click <strong>Request Refund</strong>. The organiser will review and approve or reject the request.' }
+      ]
+    },
+    {
+      id: 'organiser',
+      color: '#FBBC04',
+      icon: 'fa-gauge',
+      title: 'Organiser Guide',
+      steps: [
+        { n:'1', title:'Switch to Organiser Role', body:'Register or log in with an <em>Organiser</em> account. The nav bar will show <strong>Create Event</strong> and <strong>Organiser Panel</strong> links.' },
+        { n:'2', title:'Create an Event', body:'Click <strong>Create Event</strong>. Fill in the event name, description (or use the AI assistant), date/time, venue (physical address or online link), category, and banner image upload. Then add one or more ticket types with prices and capacity.' },
+        { n:'3', title:'Set Discount Codes', body:'In the Create / Edit Event form, scroll to the <em>Discount Codes</em> section. Add a code, the discount percentage, and an optional expiry date.' },
+        { n:'4', title:'Dashboard & Analytics', body:'In <strong>Organiser Panel → Manage Event</strong> you can see total registrations, revenue, check-in stats, and a full attendee list. Download the attendee CSV from the same page.' },
+        { n:'5', title:'Request Payout', body:'At the bottom of the event management page, the <em>Revenue Payout Sandbox</em> section shows your simulated earnings. Click <strong>Request Payout</strong> to simulate a withdrawal.' }
+      ]
+    },
+    {
+      id: 'checkin',
+      color: '#34A853',
+      icon: 'fa-qrcode',
+      title: 'QR Check-In System',
+      steps: [
+        { n:'1', title:'Open the Check-In Panel', body:'On event day, go to <strong>Organiser Panel → Manage Event → Check-In</strong>. The live scanner panel will open.' },
+        { n:'2', title:'Camera Scanner', body:'The panel automatically requests camera access. Point the camera at an attendee\'s QR code. If the ticket is valid and unused, the screen turns <span style="color:#34A853;font-weight:700;">green</span> and plays a success chime.' },
+        { n:'3', title:'Manual Entry', body:'If scanning is not possible, type or paste the QR token number into the <em>Manual Entry</em> field and press Enter.' },
+        { n:'4', title:'Attendee Preview Card', body:'After each successful scan, the panel shows the attendee\'s name, email, ticket tier, quantity, and a profile picture (if set) so you can visually verify identity.' },
+        { n:'5', title:'Already Checked In', body:'If the same ticket is scanned a second time, the screen turns <span style="color:#FBBC04;font-weight:700;">amber</span> with a warning, preventing duplicate entry.' }
+      ]
+    }
+  ]
+  %>
+
+  <% docSections.forEach(sec => { %>
+    <div id="<%= sec.id %>" style="margin-bottom:40px; scroll-margin-top:80px;">
+      <h2 style="font-size:1.35rem; font-weight:800; margin-bottom:20px; display:flex; align-items:center; gap:12px;">
+        <span style="width:38px;height:38px;border-radius:10px;background:rgba(0,0,0,0.4);border:1px solid <%= sec.color %>40;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="fa-solid <%= sec.icon %>" style="color:<%= sec.color %>;"></i>
+        </span>
+        <span style="background:linear-gradient(90deg,<%= sec.color %>,var(--text-main)); -webkit-background-clip:text; -webkit-text-fill-color:transparent;"><%= sec.title %></span>
+      </h2>
+      <div style="display:flex; flex-direction:column; gap:14px;">
+        <% sec.steps.forEach(step => { %>
+          <div class="dashboard-card" style="padding:22px 28px; display:flex; gap:18px; align-items:flex-start; border-left:3px solid <%= sec.color %>;">
+            <span style="min-width:30px;height:30px;border-radius:50%;background:<%= sec.color %>;color:#000;font-weight:800;font-size:0.8rem;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;"><%= step.n %></span>
+            <div>
+              <strong style="display:block; margin-bottom:6px; color:var(--text-main); font-size:0.97rem;"><%= step.title %></strong>
+              <p style="margin:0; color:var(--text-muted); font-size:0.92rem; line-height:1.75;"><%- step.body %></p>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+  <% }) %>
+
+  <!-- Footer nav -->
+  <div style="display:flex; gap:16px; justify-content:center; margin-top:48px; flex-wrap:wrap;">
+    <a href="/help" class="btn btn-secondary"><i class="fa-solid fa-headset"></i> Support</a>
+    <a href="/privacy-policy" class="btn btn-secondary"><i class="fa-solid fa-shield-halved"></i> Privacy Policy</a>
+    <a href="/contact" class="btn btn-secondary"><i class="fa-solid fa-code"></i> Contact Developer</a>
+  </div>
+
+</main>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,88 @@
+<%- include('../partials/header') %>
+
+<main class="container">
+  
+  <div class="dashboard-layout">
+    
+    <!-- Sidebar -->
+    <%- include('../partials/sidebar') %>
+    
+    <!-- Content Panel -->
+    <div class="dashboard-content">
+      
+      <div class="dashboard-title-row">
+        <h1>Profile & Address details</h1>
+      </div>
+
+      <% if (success) { %>
+        <div class="alert alert-success">
+          <i class="fa-solid fa-circle-check"></i> <%= success %>
+        </div>
+      <% } %>
+
+      <% if (error) { %>
+        <div class="alert alert-danger">
+          <i class="fa-solid fa-circle-exclamation"></i> <%= error %>
+        </div>
+      <% } %>
+
+      <div class="dashboard-card" style="max-width: 650px; margin: 0;">
+        <h3 class="dashboard-card-title"><i class="fa-solid fa-address-card" style="color: var(--accent-color);"></i> Personal Details & Delivery Address</h3>
+        
+        <form action="/user/profile" method="POST">
+          <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div>
+              <label for="prof-name">Full Name</label>
+              <input type="text" id="prof-name" name="name" class="form-control" value="<%= userDetail.name %>" required>
+            </div>
+            <div>
+              <label for="prof-email">Email Address (Registered)</label>
+              <input type="email" id="prof-email" class="form-control" value="<%= userDetail.email %>" disabled style="background: rgba(255,255,255,0.01); color: var(--text-muted); cursor: not-allowed;">
+            </div>
+          </div>
+
+          <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div>
+              <label for="prof-phone">Phone Number</label>
+              <input type="tel" id="prof-phone" name="phone" class="form-control" value="<%= userDetail.phone || '' %>" placeholder="+919876543210">
+            </div>
+            <div>
+              <label for="prof-city">Current City</label>
+              <input type="text" id="prof-city" name="city" class="form-control" value="<%= userDetail.city || '' %>" placeholder="e.g. Delhi">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="prof-address">Delivery Address (For physical tickets/merchandise)</label>
+            <textarea id="prof-address" name="address" class="form-control" placeholder="House/Flat No, Street, Landmark, PIN Code" rows="3"><%= userDetail.address || '' %></textarea>
+          </div>
+
+          <hr style="border: 0.5px solid var(--border-color); margin: 25px 0;" />
+
+          <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 15px;"><i class="fa-brands fa-linkedin" style="color: #0077b5;"></i> Attendee Networking & Socials</h3>
+          
+          <div class="form-group">
+            <label for="prof-linkedin">LinkedIn URL</label>
+            <input type="url" id="prof-linkedin" name="linkedin_url" class="form-control" value="<%= userDetail.linkedin_url || '' %>" placeholder="https://linkedin.com/in/username">
+          </div>
+
+          <div class="form-group" style="margin-top: 15px;">
+            <label class="form-check">
+              <input type="checkbox" name="share_linkedin" value="1" <%= userDetail.share_linkedin === 1 ? 'checked' : '' %>>
+              <span style="font-size: 0.9rem; color: var(--text-muted);">Opt-in to share my LinkedIn with other attendees of events I book. (Show on event details page)</span>
+            </label>
+          </div>
+
+          <div style="margin-top: 30px;">
+            <button type="submit" class="btn btn-primary" style="padding: 12px 25px;"><i class="fa-solid fa-floppy-disk"></i> Save Profile Details</button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+
+  </div>
+
+</main>
+
+<%- include('../partials/footer') %>

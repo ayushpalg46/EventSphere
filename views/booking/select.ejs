@@ -1,0 +1,111 @@
+<%- include('../partials/header') %>
+
+<main class="container">
+  
+  <div class="dashboard-card" style="max-width: 800px; margin: 0 auto;">
+    <h2 style="font-size: 1.8rem; font-weight: 700; margin-bottom: 8px;">Select Your Tickets</h2>
+    <p style="color: var(--text-muted); margin-bottom: 25px;"><%= event.title %> &bull; <%= event.venue_name %>, <%= event.city %></p>
+    
+    <% if (error) { %>
+      <div class="alert alert-danger">
+        <i class="fa-solid fa-circle-exclamation"></i> <%= error %>
+      </div>
+    <% } %>
+
+    <form action="/booking/<%= event.id %>" method="POST">
+      
+      <!-- List ticket types -->
+      <div style="display: flex; flex-direction: column; gap: 20px; margin-bottom: 30px;">
+        <% ticketTypes.forEach(ticket => { %>
+          <div class="ticket-select-row" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; display: flex; justify-content: space-between; align-items: center; gap: 20px;">
+            <div>
+              <h3 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 4px;"><%= ticket.name %></h3>
+              
+              <!-- Pricing block showing early birds details if active -->
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <% if (ticket.isEarlyBirdActive) { %>
+                  <span class="price-val" style="color: var(--success-color);">Rs. <%= ticket.early_bird_price %></span>
+                  <span style="text-decoration: line-through; color: var(--text-muted); font-size: 0.9rem;">Rs. <%= ticket.price %></span>
+                  <span style="font-size: 0.75rem; background: rgba(16, 185, 129, 0.1); color: var(--success-color); padding: 2px 6px; border-radius: 4px; font-weight: 700;">Early Bird Active</span>
+                <% } else { %>
+                  <span class="price-val">Rs. <%= ticket.price %></span>
+                <% } %>
+              </div>
+
+              <!-- Available slots -->
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">
+                <%= ticket.capacity - ticket.sold %> / <%= ticket.capacity %> Tickets Available
+              </p>
+
+              <!-- Promo Code tags helper -->
+              <% if (ticket.discount_code) { %>
+                <p style="font-size: 0.8rem; color: var(--accent-color); margin-top: 4px; font-weight: 500;">
+                  <i class="fa-solid fa-tags"></i> Use code <strong><%= ticket.discount_code %></strong> for <%= ticket.discount_percent %>% off!
+                </p>
+              <% } %>
+            </div>
+
+            <!-- Incrementor controls -->
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <% if (ticket.sold >= ticket.capacity) { %>
+                <span class="badge badge-failed" style="padding: 8px 12px;">Sold Out</span>
+              <% } else { %>
+                <button type="button" class="btn qty-minus btn-secondary" onclick="const input = this.nextElementSibling; if(parseInt(input.value) > 0) { input.value = parseInt(input.value) - 1; input.dispatchEvent(new Event('change')); }" style="padding: 6px 12px;"><i class="fa-solid fa-minus"></i></button>
+                
+                <input type="number" 
+                       name="quantity_<%= ticket.id %>" 
+                       class="ticket-qty-input form-control" 
+                       value="0" 
+                       min="0" 
+                       max="<%= Math.min(10, ticket.capacity - ticket.sold) %>" 
+                       data-price="<%= ticket.isEarlyBirdActive ? ticket.early_bird_price : ticket.price %>"
+                       data-discount-code="<%= ticket.discount_code || '' %>"
+                       data-discount-percent="<%= ticket.discount_percent || 0 %>"
+                       style="width: 60px; text-align: center; padding: 6px 0; background: var(--bg-primary); border-color: var(--border-color);"
+                       readonly>
+                       
+                <button type="button" class="btn qty-plus btn-secondary" onclick="const input = this.previousElementSibling; const maxVal = parseInt(input.getAttribute('max')) || 10; if(parseInt(input.value) < maxVal) { input.value = parseInt(input.value) + 1; input.dispatchEvent(new Event('change')); }" style="padding: 6px 12px;"><i class="fa-solid fa-plus"></i></button>
+              <% } %>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+
+      <!-- Coupon Applied input -->
+      <div class="form-group" style="display: flex; flex-direction: column; max-width: 400px; margin-bottom: 30px;">
+        <div style="display: flex; gap: 10px;">
+          <input type="text" id="promo-code-input" name="discount_code" class="form-control" placeholder="Enter coupon code (e.g. SUNBURN10)" style="text-transform: uppercase;">
+          <button type="button" id="apply-promo-btn" class="btn btn-secondary">Apply</button>
+        </div>
+        <p id="promo-message" style="font-size: 0.85rem; margin-top: 8px; font-weight: 600; display: none;"></p>
+      </div>
+
+      <!-- Live Pricing summary card -->
+      <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; margin-bottom: 30px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95rem; color: var(--text-muted);">
+          <span>Subtotal</span>
+          <span id="calc-subtotal">Rs. 0.00</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95rem; color: var(--text-muted);">
+          <span>Promo Discount</span>
+          <span id="calc-discount" style="color: var(--success-color);">- Rs. 0.00</span>
+        </div>
+        <hr style="border: 0.5px solid var(--border-color); margin: 12px 0;" />
+        <div style="display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: 700;">
+          <span>Final Amount</span>
+          <span id="calc-total" style="color: var(--accent-color);">Rs. 0.00</span>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 15px;">
+        <a href="/events/<%= event.id %>" class="btn btn-secondary" style="flex: 1;"><i class="fa-solid fa-arrow-left"></i> Cancel</a>
+        <button type="submit" class="btn btn-primary" style="flex: 2;">Proceed to Checkout <i class="fa-solid fa-circle-arrow-right"></i></button>
+      </div>
+
+    </form>
+  </div>
+
+</main>
+
+<script src="/js/booking.js?v=2"></script>
+<%- include('../partials/footer') %>

@@ -1,0 +1,74 @@
+<%- include('../partials/header') %>
+
+<main class="container">
+  
+  <div class="dashboard-layout">
+    
+    <!-- Sidebar -->
+    <%- include('../partials/sidebar') %>
+    
+    <!-- Panel Content -->
+    <div class="dashboard-content">
+      
+      <div class="dashboard-title-row">
+        <h1>Ticket Refund Requests</h1>
+      </div>
+
+      <p style="color: var(--text-muted); margin-bottom: 30px;">Manage attendee refund requests. Approving a request will mark the ticket status as refunded and free up event ticket capacity.</p>
+
+      <div class="dashboard-card" style="margin-bottom: 30px;">
+        <h3 class="dashboard-card-title"><i class="fa-solid fa-reply-all" style="color: var(--warning-color);"></i> Pending Refund Pipeline</h3>
+
+        <% if (refundRequests && refundRequests.length > 0) { %>
+          <div class="table-responsive">
+            <table class="dashboard-table">
+              <thead>
+                <tr>
+                  <th>Booking ID</th>
+                  <th>Attendee Name</th>
+                  <th>Event details</th>
+                  <th>Ticket Type</th>
+                  <th>Quantity</th>
+                  <th>Amount</th>
+                  <th style="text-align: right;">Action Decisions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% refundRequests.forEach(req => { %>
+                  <tr>
+                    <td>#ES-<%= req.booking_id %></td>
+                    <td><strong><%= req.user_name %></strong></td>
+                    <td><strong><%= req.event_title %></strong></td>
+                    <td><%= req.ticket_name %></td>
+                    <td><%= req.quantity %></td>
+                    <td>Rs. <%= req.total_amount %></td>
+                    <td style="text-align: right; display: flex; gap: 8px; justify-content: flex-end;">
+                      <!-- Approve Refund -->
+                      <form action="/organiser/refunds/<%= req.booking_id %>" method="POST" style="margin: 0;" onsubmit="return confirm('Confirm refund approval. The ticket will be invalidated.')">
+                        <input type="hidden" name="action" value="approve">
+                        <button type="submit" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem; background: var(--success-color);"><i class="fa-solid fa-check"></i> Approve</button>
+                      </form>
+
+                      <!-- Reject Refund -->
+                      <form action="/organiser/refunds/<%= req.booking_id %>" method="POST" style="margin: 0;" onsubmit="return confirm('Confirm refund rejection.')">
+                        <input type="hidden" name="action" value="reject">
+                        <button type="submit" class="btn btn-danger" style="padding: 6px 12px; font-size: 0.8rem;"><i class="fa-solid fa-xmark"></i> Reject</button>
+                      </form>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        <% } else { %>
+          <p style="color: var(--text-muted); text-align: center; padding: 25px;">No pending refund requests found.</p>
+        <% } %>
+      </div>
+
+    </div>
+
+  </div>
+
+</main>
+
+<%- include('../partials/footer') %>

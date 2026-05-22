@@ -1,0 +1,56 @@
+<!-- views/partials/footer.ejs -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-col">
+      <h3 class="logo"><i class="fa-solid fa-circle-nodes"></i> EventSphere</h3>
+      <p>Your one-stop destination for booking concerts, stand-up comedy, tech hackathons, and sports events. Experience modern, frictionless ticketing.</p>
+      <p><i class="fa-solid fa-location-dot"></i> New Delhi, India</p>
+    </div>
+    <div class="footer-col">
+      <h3>Quick Links</h3>
+      <ul class="footer-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/events">Explore Events</a></li>
+        <li><a href="/help">Customer Support</a></li>
+        <li><a href="/login">Account Login</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h3>Resources</h3>
+      <ul class="footer-links">
+        <li><a href="/help"><i class="fa-solid fa-headset" style="color:#4285F4; width:16px;"></i> Support</a></li>
+        <li><a href="/docs"><i class="fa-solid fa-book-open" style="color:#FBBC04; width:16px;"></i> Documentation</a></li>
+        <li><a href="/privacy-policy"><i class="fa-solid fa-shield-halved" style="color:#34A853; width:16px;"></i> Privacy Policy</a></li>
+        <li><a href="/contact"><i class="fa-solid fa-code" style="color:#EA4335; width:16px;"></i> Contact Developer</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>&copy; 2026 EventSphere Platform. All rights reserved.</p>
+    <p>Built with <i class="fa-solid fa-heart" style="color:#EA4335;"></i> by <a href="/contact" style="color:#4285F4; font-weight:600;">Ayush G. Pal</a> &amp; <a href="/contact" style="color:#EA4335; font-weight:600;">Tanish S. Kotian</a></p>
+  </div>
+</footer>
+
+<!-- Card tilt interactions -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+
+<script>
+  // Initialize Vanilla Tilt on all elements with data-tilt
+  if (typeof VanillaTilt !== 'undefined') {
+    VanillaTilt.init(document.querySelectorAll("[data-tilt]"), {
+      max: 15,
+      speed: 400,
+      glare: true,
+      "max-glare": 0.3,
+      perspective: 1000,
+      scale: 1.02
+    });
+  }
+</script>
+
+<!-- Antigravity-style animated orb background with mouse hover parallax -->
+<script src="/js/antigravity-bg.js"></script>
+
+<script src="/js/main.js"></script>
+</body>
+</html>

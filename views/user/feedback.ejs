@@ -1,0 +1,81 @@
+<%- include('../partials/header') %>
+
+<main class="container">
+  
+  <div class="form-card" style="max-width: 600px;">
+    <h2 class="form-title" style="margin-bottom: 10px;"><i class="fa-solid fa-comments" style="color: var(--accent-color);"></i> Share Your Feedback</h2>
+    <p style="text-align: center; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 30px;">How was your experience at <strong><%= event.title %></strong>? Your feedback helps the organiser improve future editions.</p>
+    
+    <% if (success) { %>
+      <div class="alert alert-success">
+        <i class="fa-solid fa-circle-check"></i> <%= success %>
+      </div>
+      <div style="text-align: center; margin-top: 20px;">
+        <a href="/user/dashboard" class="btn btn-primary">Back to Dashboard</a>
+      </div>
+    <% } else { %>
+      
+      <% if (error) { %>
+        <div class="alert alert-danger">
+          <i class="fa-solid fa-circle-exclamation"></i> <%= error %>
+        </div>
+      <% } %>
+
+      <form action="/feedback/<%= event.id %>" method="POST">
+        
+        <div class="form-group" style="display: flex; align-items: center; gap: 15px;">
+          <label style="margin-bottom: 0; font-weight: 600;">Overall Rating:</label>
+          <select name="rating" class="form-control" style="width: auto; background: var(--bg-secondary); color: white;" required>
+            <option value="5">⭐⭐⭐⭐⭐ (5 Star)</option>
+            <option value="4">⭐⭐⭐⭐ (4 Star)</option>
+            <option value="3">⭐⭐⭐ (3 Star)</option>
+            <option value="2">⭐⭐ (2 Star)</option>
+            <option value="1">⭐ (1 Star)</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="margin-top: 20px;">
+          <label for="satisfaction-slider" style="display: flex; justify-content: space-between;">
+            <span>Satisfaction Score (1 - 10)</span>
+            <span id="slider-val" style="color: var(--accent-color); font-weight: 700;">8</span>
+          </label>
+          <input type="range" id="satisfaction-slider" name="satisfaction_score" min="1" max="10" value="8" class="form-control" style="padding: 0; height: 8px; cursor: pointer; accent-color: var(--accent-color);">
+        </div>
+
+        <div class="form-group" style="margin-top: 25px;">
+          <label class="form-check">
+            <input type="checkbox" name="would_recommend" value="1" checked>
+            <span style="font-size: 0.95rem;">I would recommend this event series to my friends & colleagues</span>
+          </label>
+        </div>
+
+        <div class="form-group" style="margin-top: 25px;">
+          <label for="feedback-comments">Comments & Suggestions (Will also post as a public review)</label>
+          <textarea id="feedback-comments" name="comments" class="form-control" placeholder="What did you like the most? Any areas of improvement (sound, lights, seating, timing)?" rows="4"></textarea>
+        </div>
+
+        <div style="margin-top: 35px; display: flex; gap: 15px;">
+          <a href="/user/dashboard" class="btn btn-secondary" style="flex: 1;">Skip</a>
+          <button type="submit" class="btn btn-primary" style="flex: 2;">Submit Feedback <i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+
+      </form>
+
+      <script>
+        // Update slider value display
+        const slider = document.getElementById('satisfaction-slider');
+        const display = document.getElementById('slider-val');
+        if (slider && display) {
+          slider.addEventListener('input', () => {
+            display.textContent = slider.value;
+          });
+        }
+      </script>
+
+    <% } %>
+
+  </div>
+
+</main>
+
+<%- include('../partials/footer') %>

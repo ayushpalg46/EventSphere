@@ -1,0 +1,235 @@
+<%- include('../partials/header') %>
+
+<main class="container">
+  
+  <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 40px; max-width: 1000px; margin: 0 auto;">
+    
+    <!-- Left Column: Payment options mock -->
+    <div>
+      <div class="dashboard-card" style="margin-bottom: 25px;">
+        <h2 style="font-size: 1.4rem; font-weight: 700; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+          <i class="fa-solid fa-credit-card" style="color: var(--accent-color);"></i> Select Payment Method
+        </h2>
+
+        <div class="alert alert-success" style="background: rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.15); color: var(--success-color); font-size: 0.85rem; margin-bottom: 25px;">
+          <i class="fa-solid fa-circle-info"></i> <strong>Sandbox Mode Active:</strong> Payment gateway simulation is loaded. Clicking "Complete Booking" will mock a successful transaction with Razorpay.
+        </div>
+
+        <!-- Simulated Options tabs -->
+        <div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 35px;">
+          <label style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; display: flex; align-items: center; gap: 15px; cursor: pointer;">
+            <input type="radio" name="payment_method" value="razorpay" checked style="accent-color: var(--accent-color);">
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+              <div>
+                <strong>Razorpay Sandbox Checkout</strong>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">Mock credit cards, debit cards, Netbanking, or UPI wallets</p>
+              </div>
+              <i class="fa-solid fa-wallet" style="font-size: 1.5rem; color: var(--text-muted);"></i>
+            </div>
+          </label>
+
+          <label style="background: rgba(255,255,255,0.01); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; display: flex; align-items: center; gap: 15px; opacity: 0.6; cursor: not-allowed;">
+            <input type="radio" name="payment_method" disabled style="accent-color: var(--accent-color);">
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+              <div>
+                <strong>Stripe Sandbox Payments</strong>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">Not available for this event tier</p>
+              </div>
+              <i class="fa-brands fa-stripe" style="font-size: 1.8rem; color: var(--text-muted);"></i>
+            </div>
+          </label>
+        </div>
+
+        <!-- Razorpay Form submit intercept -->
+        <form id="checkout-payment-form" action="/booking/pay" method="POST">
+          <button type="submit" id="pay-now-trigger-btn" class="btn btn-primary" style="width: 100%; padding: 15px; font-size: 1.1rem; box-shadow: var(--shadow-neon);">
+            Complete Payment (Rs. <%= Number(order.total_amount).toFixed(2) %>) <i class="fa-solid fa-lock"></i>
+          </button>
+        </form>
+      </div>
+      
+      <a href="/booking/<%= order.event_id %>" style="color: var(--text-muted); font-size: 0.9rem; display: inline-flex; align-items: center; gap: 6px;">
+        <i class="fa-solid fa-arrow-left-long"></i> Modify selected tickets or apply another promo
+      </a>
+    </div>
+
+    <!-- Right Column: Order summary card -->
+    <div>
+      <div class="dashboard-card" style="background: rgba(19, 17, 34, 0.85); border-color: rgba(255, 42, 95, 0.15);">
+        <h3 class="dashboard-card-title" style="font-size: 1.15rem; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px;">Order Summary</h3>
+        
+        <p style="font-weight: 700; color: var(--text-main); font-size: 1rem; margin-bottom: 15px;"><%= order.event_title %></p>
+        
+        <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+          <% order.items.forEach(item => { %>
+            <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
+              <span style="color: var(--text-muted);"><%= item.name %> <strong style="color: var(--text-main);">x<%= item.quantity %></strong></span>
+              <span style="font-weight: 500;">Rs. <%= Number(item.total).toFixed(2) %></span>
+            </div>
+          <% }) %>
+        </div>
+
+        <hr style="border: 0.5px solid var(--border-color); margin: 15px 0;" />
+
+        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.9rem;">
+          <div style="display: flex; justify-content: space-between; color: var(--text-muted);">
+            <span>Subtotal</span>
+            <span>Rs. <%= Number(order.subtotal).toFixed(2) %></span>
+          </div>
+          <% if (order.discount_applied > 0) { %>
+            <div style="display: flex; justify-content: space-between; color: var(--success-color);">
+              <span>Discount (<%= order.discount_code %>)</span>
+              <span>- Rs. <%= Number(order.discount_applied).toFixed(2) %></span>
+            </div>
+          <% } %>
+          <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 1.1rem; color: var(--accent-color); margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-color);">
+            <span>Total Payable</span>
+            <span>Rs. <%= Number(order.total_amount).toFixed(2) %></span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Interactive Payment Gateway Simulator Modal Overlay -->
+  <div id="payment-gateway-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 200; justify-content: center; align-items: center; padding: 20px;">
+    <div style="width: 450px; background: #0c0b11; border: 1.5px solid var(--border-color); display: flex; flex-direction: column; max-width: 100%; box-shadow: 0 0 25px rgba(255, 0, 51, 0.2);">
+      
+      <!-- Modal Gateway Header -->
+      <div style="background: #1c0f20; padding: 20px; border-bottom: 1.5px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <span style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; color: var(--accent-color); font-weight: 700;"><i class="fa-solid fa-shield-halved"></i> Razorpay Secure</span>
+          <h2 style="font-size: 1.1rem; font-weight: 700; margin-top: 3px; color: white;">EventSphere Sandbox</h2>
+        </div>
+        <div style="text-align: right;">
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Amount</span>
+          <p style="font-size: 1.1rem; font-weight: 700; color: var(--warning-color);">Rs. <%= Number(order.total_amount).toFixed(2) %></p>
+        </div>
+      </div>
+
+      <!-- Payment Mode Tabs Form -->
+      <div id="gateway-selection-panel" style="padding: 25px;">
+        <h4 style="font-size: 0.9rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-bottom: 15px;">Choose Payment Mode</h4>
+        
+        <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px;">
+          <!-- Card option -->
+          <div class="gateway-tab-option" data-target="card-form" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); padding: 12px 15px; display: flex; align-items: center; gap: 12px; cursor: pointer;">
+            <i class="fa-regular fa-credit-card" style="font-size: 1.2rem; color: var(--accent-color);"></i>
+            <span style="font-size: 0.95rem; font-weight: 600;">Pay via Credit / Debit Card</span>
+          </div>
+          <!-- UPI Option -->
+          <div class="gateway-tab-option" data-target="upi-form" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); padding: 12px 15px; display: flex; align-items: center; gap: 12px; cursor: pointer;">
+            <i class="fa-solid fa-mobile-screen-button" style="font-size: 1.2rem; color: var(--accent-color);"></i>
+            <span style="font-size: 0.95rem; font-weight: 600;">Pay via UPI (GPay, PhonePe)</span>
+          </div>
+        </div>
+
+        <!-- Hidden Cards Entry Details -->
+        <div id="card-form" class="gateway-method-form" style="display: none;">
+          <div class="form-group">
+            <label style="font-size: 0.75rem;">Card Number</label>
+            <input type="text" class="form-control" placeholder="4111 2222 3333 4444" style="background: rgba(255,255,255,0.02);" value="4111222233334444" required>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;" class="form-group">
+            <div>
+              <label style="font-size: 0.75rem;">Expiry (MM/YY)</label>
+              <input type="text" class="form-control" placeholder="12/29" style="background: rgba(255,255,255,0.02);" value="12/29" required>
+            </div>
+            <div>
+              <label style="font-size: 0.75rem;">CVV</label>
+              <input type="password" class="form-control" placeholder="123" style="background: rgba(255,255,255,0.02);" value="123" required>
+            </div>
+          </div>
+          <button type="button" class="btn btn-primary submit-gateway-pay" style="width: 100%; margin-top: 15px;">Simulate Card Payment</button>
+        </div>
+
+        <!-- Hidden UPI Entry Details -->
+        <div id="upi-form" class="gateway-method-form" style="display: none;">
+          <div class="form-group">
+            <label style="font-size: 0.75rem;">Enter UPI ID / VPA</label>
+            <input type="text" class="form-control" placeholder="user@okaxis" style="background: rgba(255,255,255,0.02);" value="hackathon_judge@oksbi" required>
+          </div>
+          <button type="button" class="btn btn-primary submit-gateway-pay" style="width: 100%; margin-top: 15px;">Simulate UPI Payment</button>
+        </div>
+
+        <button type="button" id="close-gateway-btn" class="btn btn-secondary" style="width: 100%; margin-top: 15px; padding: 10px; font-size: 0.8rem;">Cancel Transaction</button>
+      </div>
+
+      <!-- Loading Processing screen -->
+      <div id="gateway-processing-panel" style="display: none; padding: 50px 30px; text-align: center;">
+        <i class="fa-solid fa-spinner fa-spin" style="font-size: 3rem; color: var(--accent-color); margin-bottom: 25px;"></i>
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 10px;">Contacting Issuing Bank...</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">Authenticating secure transaction credentials. Please do not refresh, go back or close this browser window.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const triggerBtn = document.getElementById('pay-now-trigger-btn');
+      const form = document.getElementById('checkout-payment-form');
+      const modal = document.getElementById('payment-gateway-modal');
+      const closeBtn = document.getElementById('close-gateway-btn');
+      
+      const tabOptions = document.querySelectorAll('.gateway-tab-option');
+      const methodForms = document.querySelectorAll('.gateway-method-form');
+      
+      const selectionPanel = document.getElementById('gateway-selection-panel');
+      const processingPanel = document.getElementById('gateway-processing-panel');
+      const submitGatewayBtns = document.querySelectorAll('.submit-gateway-pay');
+
+      // 1. Intercept pay button click to display modal overlay
+      if (triggerBtn && form && modal) {
+        form.addEventListener('submit', (e) => {
+          e.preventDefault();
+          modal.style.display = 'flex';
+          
+          // Open Card form by default
+          document.querySelector('[data-target="card-form"]').click();
+        });
+      }
+
+      // 2. Tab options selection toggle
+      tabOptions.forEach(tab => {
+        tab.addEventListener('click', () => {
+          tabOptions.forEach(t => {
+            t.style.borderColor = 'var(--border-color)';
+            t.style.background = 'rgba(255,255,255,0.03)';
+          });
+          tab.style.borderColor = 'var(--accent-color)';
+          tab.style.background = 'rgba(255,0,51,0.05)';
+
+          const targetFormId = tab.getAttribute('data-target');
+          methodForms.forEach(f => f.style.display = 'none');
+          document.getElementById(targetFormId).style.display = 'block';
+        });
+      });
+
+      // 3. Close Gateway
+      if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+          modal.style.display = 'none';
+        });
+      }
+
+      // 4. Submit Mock Pay triggers Auth Loading Spinner
+      submitGatewayBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          selectionPanel.style.display = 'none';
+          processingPanel.style.display = 'block';
+
+          // Hold spinner for 2.2 seconds then execute database form POST!
+          setTimeout(() => {
+            form.submit();
+          }, 2200);
+        });
+      });
+    });
+  </script>
+
+</main>
+
+<%- include('../partials/footer') %>
