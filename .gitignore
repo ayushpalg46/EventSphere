@@ -1,0 +1,35 @@
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Environment config files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# SQLite Database files
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+database/*.db
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Simulated emails
+scratch/simulated_emails/
+
+# Temporary design resources
+extracted_ui/
+stitch_ai_powered_3d_eventsphere.zip
