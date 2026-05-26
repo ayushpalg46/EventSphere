@@ -6,7 +6,7 @@ It features a high-contrast dark space design, interactive ticket selector/check
 
 ---
 
-## 🎨 Design System & Aesthetic Reference
+## Design System & Aesthetic Reference
 This interface is inspired by high-contrast futuristic dark modes, utilizing a quad-color block palette:
 - **Primary Void**: Pure Black `#000000` (used for standard backgrounds)
 - **High Signal**: High-contrast White `#ffffff` (for readability)
@@ -18,7 +18,7 @@ This interface is inspired by high-contrast futuristic dark modes, utilizing a q
 
 ---
 
-## 🛠️ Core Features Implemented
+## Core Features Implemented
 
 ### 1. Event Creation & Management (Organiser Side)
 - **Dynamic Event Creator**: Support for category filters, physical venues, or virtual/online stream links.
@@ -43,50 +43,3 @@ This interface is inspired by high-contrast futuristic dark modes, utilizing a q
 - **Smart Schedule Builder**: Reorders session times for optimal audience flow based on speaker names $\rightarrow$ parses JSON responses.
 - *Includes pre-configured offline HTML template fallbacks if no Gemini API keys are active.*
 
----
-
-## 📂 Tech Stack
-- **Backend Runtime**: Node.js & Express.js
-- **Database Engine**: SQLite (`sqlite3` module wrapping queries with native Promises)
-- **Session Manager**: `express-session` backed by a `connect-sqlite3` session store (survives restarts)
-- **Asset Uploads**: Multer image filter configurations
-- **Ticket Codes**: `qrcode` base64 encoders
-- **Template Engine**: EJS (Embedded JavaScript) layouts
-- **Theme styles**: Custom Vanilla CSS variables
-
----
-
-## 🚀 Setting Up Locally
-
-### 1. Install Dependencies
-```bash
-npm install
-```
-
-### 2. Setup Environment
-Create a `.env` file in the root directory:
-```env
-PORT=3000
-SESSION_SECRET=eventsphere_your_local_secret_key
-DB_PATH=./database/eventsphere.db
-GEMINI_API_KEY=your_google_gemini_api_key
-```
-
-### 3. Seed Database
-Initialize tables and sample events:
-```bash
-node database/seed.js
-```
-
-### 4. Start Server
-Run in development mode (using nodemon):
-```bash
-npm run dev
-```
-Open **[http://localhost:3000](http://localhost:3000)** in your browser!
-
----
-
-## 🔑 Default Test Accounts
-- **Organiser Panel Login**: `organiser@eventsphere.com` / `password123`
-- **Attendee Booking Login**: `attendee@eventsphere.com` / `password123`
