@@ -2,7 +2,7 @@
 
 
 const { dbQuery } = require('../database/db');
-const { sendEmail } = require('./emailSender');
+const { sendEmail } = require('./email-sender');
 
 
 async function checkAndSendFeedbackEmails() {

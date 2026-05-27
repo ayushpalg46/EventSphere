@@ -5,8 +5,8 @@ const express = require('express');
 const router = express.Router();
 const { dbQuery } = require('../database/db');
 const { isLoggedIn } = require('../middleware/auth');
-const { generateQRCode } = require('../utils/qrGenerator');
-const { sendEmail } = require('../utils/emailSender');
+const { generateQRCode } = require('../utils/qr-generator');
+const { sendEmail } = require('../utils/email-sender');
 
 
 router.get('/booking/checkout', isLoggedIn, (req, res) => {

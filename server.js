@@ -197,7 +197,7 @@ app.use((err, req, res, next) => {
 
 
 const { initDatabase } = require('./database/db');
-const { startFeedbackCron } = require('./utils/feedbackCron');
+const { startFeedbackCron } = require('./utils/feedback-cron');
 
 initDatabase().then(() => {
   

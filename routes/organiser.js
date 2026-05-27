@@ -6,7 +6,7 @@ const router = express.Router();
 const { dbQuery } = require('../database/db');
 const { isLoggedIn, isOrganiser } = require('../middleware/auth');
 const upload = require('../middleware/upload');
-const { exportAttendeesToCSV } = require('../utils/csvExporter');
+const { exportAttendeesToCSV } = require('../utils/csv-exporter');
 
 
 router.use('/organiser', isLoggedIn, isOrganiser);
@@ -394,7 +394,7 @@ router.post('/organiser/refunds/:bookingId', async (req, res) => {
       );
       
       await dbQuery.run(
-        `UPDATE ticket_types SET sold = MAX(0, sold - ?) WHERE id = ?`,
+        `UPDATE ticket_types SET sold = GREATEST(0, sold - ?) WHERE id = ?`,
         [booking.quantity, booking.ticket_type_id]
       );
       

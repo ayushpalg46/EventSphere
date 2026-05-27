@@ -100,9 +100,9 @@ The server will start running at [http://localhost:3000](http://localhost:3000).
 ### 📝 Project Details
 
 - **Problem Statement Chose**: Event Management & Ticketing Platform
-- **Team Name**: EventSphere Devs
+- **Team Name**: TechDev
 - **Team Members & Roles**:
-  - **Ayush** (SpendWise Dev) — Backend Engineering, Database Architecture, API Implementation, Security
+  - **AYUSH.G.PAL** — Backend Engineering, Database Architecture, API Implementation, Security
   - **Tanish Sunil Kotian** — Frontend Design, UI Styling, Aesthetics, WebRTC QR Scanner Integration
 
 ---
