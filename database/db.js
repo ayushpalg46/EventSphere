@@ -1,15 +1,15 @@
-// database/db.js
-// Migrated to PostgreSQL for free permanent storage on Supabase/Neon!
+
+
 
 const { Pool } = require('pg');
 const fs = require('fs');
 const path = require('path');
 
-// Configure the connection pool
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
-    rejectUnauthorized: false // Required for Supabase/Neon
+    rejectUnauthorized: false 
   }
 });
 
@@ -22,22 +22,22 @@ pool.on('error', (err) => {
   process.exit(-1);
 });
 
-// Helper functions to run queries and simulate SQLite API to avoid rewriting routes
+
 const dbQuery = {
   
-  // Transform SQLite '?' parameters to PostgreSQL '$1, $2, ...' syntax
+  
   _transformQuery(sql) {
     let index = 1;
     let pgSql = sql.replace(/\?/g, () => `$${index++}`);
     
-    // SQLite run() returns the inserted ID. Postgres requires 'RETURNING id' for INSERT statements.
+    
     if (pgSql.trim().toUpperCase().startsWith('INSERT') && !pgSql.toUpperCase().includes('RETURNING ID')) {
       pgSql += ' RETURNING id';
     }
     return pgSql;
   },
 
-  // Run SQL statement (INSERT, UPDATE, DELETE)
+  
   async run(sql, params = []) {
     const pgSql = this._transformQuery(sql);
     try {
@@ -52,7 +52,7 @@ const dbQuery = {
     }
   },
 
-  // Get a single row
+  
   async get(sql, params = []) {
     const pgSql = this._transformQuery(sql);
     try {
@@ -64,7 +64,7 @@ const dbQuery = {
     }
   },
 
-  // Get all rows
+  
   async all(sql, params = []) {
     const pgSql = this._transformQuery(sql);
     try {
@@ -76,9 +76,9 @@ const dbQuery = {
     }
   },
 
-  // Execute raw script (multiple statements separated by ;)
+  
   async exec(sql) {
-    // pg driver doesn't support multiple statements natively with parameters, but exec has no params.
+    
     try {
       await pool.query(sql);
     } catch (err) {
@@ -90,7 +90,7 @@ const dbQuery = {
 
 const initDatabase = async () => {
   try {
-    // Check if users table exists in PostgreSQL
+    
     const checkTableSql = "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'users') as exists";
     const result = await pool.query(checkTableSql);
     const tableExists = result.rows[0].exists;
@@ -105,7 +105,7 @@ const initDatabase = async () => {
       console.log('PostgreSQL Database already initialized.');
     }
 
-    // Migration check: Ensure bookings table has the 'feedback_sent' column
+    
     const checkFeedbackSentSql = `
       SELECT column_name 
       FROM information_schema.columns 

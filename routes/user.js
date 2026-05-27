@@ -1,19 +1,19 @@
-// routes/user.js
-// Attendee dashboard, Profile updates, Address, Wishlist toggle, and Notifications panel
+
+
 
 const express = require('express');
 const router = express.Router();
 const { dbQuery } = require('../database/db');
 const { isLoggedIn } = require('../middleware/auth');
 
-// Apply auth check to user dashboard/profile paths
+
 router.use('/user', isLoggedIn);
 
-// Attendee Dashboard
+
 router.get('/user/dashboard', async (req, res) => {
   const userId = req.session.user.id;
   try {
-    // 1. Get user bookings with QR codes
+    
     const bookings = await dbQuery.all(
       `SELECT b.id as booking_id, b.total_amount, b.quantity, b.payment_id, b.payment_status, b.refund_status, b.checked_in, b.qr_code,
        e.title as event_title, e.start_date, e.venue_name, e.city, e.id as event_id, t.name as ticket_name
@@ -24,7 +24,7 @@ router.get('/user/dashboard', async (req, res) => {
       [userId]
     );
 
-    // 2. Get user wishlist
+    
     const wishlist = await dbQuery.all(
       `SELECT w.id as wishlist_id, e.* 
        FROM wishlist w
@@ -33,7 +33,7 @@ router.get('/user/dashboard', async (req, res) => {
       [userId]
     );
 
-    // 3. Get recent notifications
+    
     const notifications = await dbQuery.all(
       `SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 10`,
       [userId]
@@ -46,7 +46,7 @@ router.get('/user/dashboard', async (req, res) => {
   }
 });
 
-// Profile management page (details + address + LinkedIn)
+
 router.get('/user/profile', async (req, res) => {
   const userId = req.session.user.id;
   try {
@@ -58,7 +58,7 @@ router.get('/user/profile', async (req, res) => {
   }
 });
 
-// Profile update POST
+
 router.post('/user/profile', async (req, res) => {
   const userId = req.session.user.id;
   const { name, phone, address, city, linkedin_url, share_linkedin } = req.body;
@@ -72,7 +72,7 @@ router.post('/user/profile', async (req, res) => {
       [name, phone, address, city, linkedin_url, optIn, userId]
     );
 
-    // Update session object
+    
     req.session.user.name = name;
     req.session.user.phone = phone;
     req.session.user.address = address;
@@ -88,7 +88,7 @@ router.post('/user/profile', async (req, res) => {
   }
 });
 
-// Toggle Wishlist item (AJAX / link toggle)
+
 router.post('/user/wishlist/toggle', async (req, res) => {
   const userId = req.session.user.id;
   const { eventId } = req.body;
@@ -99,13 +99,13 @@ router.post('/user/wishlist/toggle', async (req, res) => {
     const existing = await dbQuery.get('SELECT * FROM wishlist WHERE user_id = ? AND event_id = ?', [userId, eventId]);
     
     if (existing) {
-      // Remove from wishlist
+      
       await dbQuery.run('DELETE FROM wishlist WHERE user_id = ? AND event_id = ?', [userId, eventId]);
       return res.json({ status: 'removed' });
     } else {
-      // Add to wishlist
+      
       await dbQuery.run('INSERT INTO wishlist (user_id, event_id) VALUES (?, ?)', [userId, eventId]);
-      // Trigger notification reminder simulation!
+      
       await dbQuery.run(
         'INSERT INTO notifications (user_id, message) VALUES (?, ?)',
         [userId, `Added to wishlist! We will remind you before ticket sales end for this event.`]
@@ -118,7 +118,7 @@ router.post('/user/wishlist/toggle', async (req, res) => {
   }
 });
 
-// Request Refund Flow
+
 router.post('/user/bookings/:bookingId/refund', async (req, res) => {
   const bookingId = req.params.bookingId;
   const userId = req.session.user.id;
@@ -133,7 +133,7 @@ router.post('/user/bookings/:bookingId/refund', async (req, res) => {
       return res.status(400).send('Booking is not eligible for refund.');
     }
 
-    // Mark as requested
+    
     await dbQuery.run('UPDATE bookings SET refund_status = \'requested\' WHERE id = ?', [bookingId]);
     res.redirect('/user/dashboard?success=Refund request sent to the organiser.');
 
@@ -143,7 +143,7 @@ router.post('/user/bookings/:bookingId/refund', async (req, res) => {
   }
 });
 
-// Notifications Read POST
+
 router.post('/user/notifications/read', async (req, res) => {
   const userId = req.session.user.id;
   try {
@@ -154,7 +154,7 @@ router.post('/user/notifications/read', async (req, res) => {
   }
 });
 
-// Download ticket page (printable view)
+
 router.get('/user/tickets/:bookingId', async (req, res) => {
   const bookingId = req.params.bookingId;
   const userId = req.session.user.id;

@@ -1,9 +1,9 @@
-// server.js
-// Main entry point for EventSphere Event Management and Ticketing Platform
+
+
 
 require('dotenv').config();
 
-// Global Debug Log Arrays
+
 global.serverErrors = [];
 global.requestLogs = [];
 
@@ -41,23 +41,23 @@ const { injectUser } = require('./middleware/auth');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Setup directories
+
 const uploadsDir = path.join(__dirname, 'public/uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-// 1. View Engine Setup
+
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// 2. Middlewares
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 3. Database-backed Session Store (so nodemon restart doesn't log us out!)
-// Note: connect-pg-simple uses the 'session' table in PostgreSQL
+
+
 app.use(
   session({
     store: new pgSession({
@@ -67,14 +67,14 @@ app.use(
     secret: process.env.SESSION_SECRET || 'eventsphere_secret_key',
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 24 * 60 * 60 * 1000 } // 24 hours
+    cookie: { maxAge: 24 * 60 * 60 * 1000 } 
   })
 );
 
-// Inject user session into EJS views automatically
+
 app.use(injectUser);
 
-// Request Logger Middleware for diagnostics
+
 app.use((req, res, next) => {
   const logEntry = {
     time: new Date().toISOString(),
@@ -97,7 +97,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// 4. Import Route files
+
 const authRoutes = require('./routes/auth');
 const eventRoutes = require('./routes/events');
 const bookingRoutes = require('./routes/booking');
@@ -122,7 +122,7 @@ app.get('/debug-logs', (req, res) => {
   });
 });
 
-// Register Routes
+
 app.use(authRoutes);
 app.use(eventRoutes);
 app.use(bookingRoutes);
@@ -133,10 +133,10 @@ app.use(communityRoutes);
 app.use(aiRoutes);
 app.use(pageRoutes);
 
-// Landing page route
+
 app.get('/', async (req, res) => {
   try {
-    // Fetch upcoming events for landing slider / list
+    
     const featuredEvents = await dbQuery.all(
       `SELECT e.id, e.title, e.category, e.banner_image, e.venue_name, e.city, e.start_date, e.end_date, e.status, MIN(t.price) as "minPrice", MAX(t.price) as "maxPrice" 
        FROM events e 
@@ -146,7 +146,7 @@ app.get('/', async (req, res) => {
        ORDER BY e.start_date ASC LIMIT 6`
     );
 
-    // List of cities for search bar
+    
     const defaultCities = ['Delhi', 'Noida', 'Gurgaon', 'Mumbai', 'Bengaluru', 'Pune', 'Goa', 'Hyderabad', 'Chennai', 'Kolkata'];
     const citiesRows = await dbQuery.all('SELECT DISTINCT city FROM events WHERE city != \'\' AND city IS NOT NULL');
     const dbCities = citiesRows.map(r => r.city);
@@ -159,25 +159,25 @@ app.get('/', async (req, res) => {
   }
 });
 
-// Customer Helpline Support Page
+
 app.get('/help', (req, res) => {
   res.render('pages/help', { success: null });
 });
 
-// Post Customer Help Form
+
 app.post('/help', (req, res) => {
   const { name, email, query_subject, message } = req.body;
-  // Log support query info
+  
   console.log(`[Helpdesk] Query from ${name} (${email}): [${query_subject}] ${message}`);
   res.render('pages/help', { success: 'Your query has been logged. Our customer help team will contact you shortly!' });
 });
 
-// 404 handler
+
 app.use((req, res) => {
   res.status(404).render('pages/help', { success: '404 - Page not found. Need support? File a ticket below.' });
 });
 
-// Global Error Handler
+
 app.use((err, req, res, next) => {
   console.error('GLOBAL ERROR:', err);
   
@@ -195,12 +195,12 @@ app.use((err, req, res, next) => {
   res.status(500).send(`<h3>Global Server Error</h3><p><b>${err.message}</b></p><pre>${err.stack}</pre>`);
 });
 
-// Listen
+
 const { initDatabase } = require('./database/db');
 const { startFeedbackCron } = require('./utils/feedbackCron');
 
 initDatabase().then(() => {
-  // Start background feedback cron worker
+  
   startFeedbackCron();
 
   app.listen(PORT, () => {

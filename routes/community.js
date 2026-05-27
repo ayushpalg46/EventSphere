@@ -1,12 +1,12 @@
-// routes/community.js
-// Community reviews, ratings, and feedback form submissions
+
+
 
 const express = require('express');
 const router = express.Router();
 const { dbQuery } = require('../database/db');
 const { isLoggedIn } = require('../middleware/auth');
 
-// POST Public Event Review and Rating
+
 router.post('/events/:eventId/review', isLoggedIn, async (req, res) => {
   const eventId = req.params.eventId;
   const userId = req.session.user.id;
@@ -17,20 +17,20 @@ router.post('/events/:eventId/review', isLoggedIn, async (req, res) => {
   }
 
   try {
-    // Check if user has already reviewed this event (prevent spam)
+    
     const existingReview = await dbQuery.get(
       'SELECT * FROM reviews WHERE user_id = ? AND event_id = ?',
       [userId, eventId]
     );
 
     if (existingReview) {
-      // Update review
+      
       await dbQuery.run(
         'UPDATE reviews SET rating = ?, comment = ? WHERE id = ?',
         [rating, comment || '', existingReview.id]
       );
     } else {
-      // Create new review
+      
       await dbQuery.run(
         'INSERT INTO reviews (user_id, event_id, rating, comment) VALUES (?, ?, ?, ?)',
         [userId, eventId, rating, comment || '']
@@ -45,7 +45,7 @@ router.post('/events/:eventId/review', isLoggedIn, async (req, res) => {
   }
 });
 
-// GET Post-Event Feedback page
+
 router.get('/feedback/:eventId', isLoggedIn, async (req, res) => {
   const eventId = req.params.eventId;
   const userId = req.session.user.id;
@@ -56,7 +56,7 @@ router.get('/feedback/:eventId', isLoggedIn, async (req, res) => {
       return res.status(404).send('Event not found.');
     }
 
-    // Verify user actually booked/registered for this event
+    
     const booking = await dbQuery.get(
       'SELECT * FROM bookings WHERE user_id = ? AND event_id = ? AND payment_status = \'paid\'',
       [userId, eventId]
@@ -74,7 +74,7 @@ router.get('/feedback/:eventId', isLoggedIn, async (req, res) => {
   }
 });
 
-// POST Post-Event Feedback submit
+
 router.post('/feedback/:eventId', isLoggedIn, async (req, res) => {
   const eventId = req.params.eventId;
   const userId = req.session.user.id;
@@ -83,7 +83,7 @@ router.post('/feedback/:eventId', isLoggedIn, async (req, res) => {
   try {
     const event = await dbQuery.get('SELECT * FROM events WHERE id = ?', [eventId]);
     
-    // Check if feedback already submitted
+    
     const existingFeedback = await dbQuery.get(
       'SELECT * FROM feedback WHERE user_id = ? AND event_id = ?',
       [userId, eventId]
@@ -110,7 +110,7 @@ router.post('/feedback/:eventId', isLoggedIn, async (req, res) => {
       ]
     );
 
-    // Also add a public review based on feedback comment if they left one!
+    
     if (comments) {
       const publicRating = parseInt(rating) || 5;
       await dbQuery.run(

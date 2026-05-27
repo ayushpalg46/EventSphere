@@ -1,12 +1,12 @@
-// routes/auth.js
-// Login, Registration, Logout routes
+
+
 
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const { dbQuery } = require('../database/db');
 
-// Registration Page GET
+
 router.get('/register', (req, res) => {
   if (req.session.user) {
     return res.redirect('/');
@@ -14,11 +14,11 @@ router.get('/register', (req, res) => {
   res.render('auth/register', { error: null, success: null });
 });
 
-// Registration POST
+
 router.post('/register', async (req, res) => {
   const { name, email, password, confirmPassword, role, phone, city } = req.body;
 
-  // Basic validation
+  
   if (!name || !email || !password || !role) {
     return res.render('auth/register', { error: 'Please fill in all required fields.', success: null });
   }
@@ -28,17 +28,17 @@ router.post('/register', async (req, res) => {
   }
 
   try {
-    // Check if user already exists
+    
     const existingUser = await dbQuery.get('SELECT * FROM users WHERE email = ?', [email]);
     if (existingUser) {
       return res.render('auth/register', { error: 'Email already registered. Please login.', success: null });
     }
 
-    // Hash password
+    
     const salt = bcrypt.genSaltSync(10);
     const hashedPassword = bcrypt.hashSync(password, salt);
 
-    // Save to database
+    
     await dbQuery.run(
       `INSERT INTO users (name, email, password, role, phone, city, visit_count)
        VALUES (?, ?, ?, ?, ?, ?, 1)`,
@@ -52,7 +52,7 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// Login Page GET
+
 router.get('/login', (req, res) => {
   if (req.session.user) {
     return res.redirect('/');
@@ -60,7 +60,7 @@ router.get('/login', (req, res) => {
   res.render('auth/login', { error: null });
 });
 
-// Login POST
+
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -75,17 +75,17 @@ router.post('/login', async (req, res) => {
       return res.render('auth/login', { error: 'Invalid email or password.' });
     }
 
-    // Check password
+    
     const isMatch = bcrypt.compareSync(password, user.password);
     if (!isMatch) {
       return res.render('auth/login', { error: 'Invalid email or password.' });
     }
 
-    // Update visit count for tracking session across devices
+    
     const newVisitCount = (user.visit_count || 0) + 1;
     await dbQuery.run('UPDATE users SET visit_count = ? WHERE id = ?', [newVisitCount, user.id]);
 
-    // Store user session (except password for security)
+    
     req.session.user = {
       id: user.id,
       name: user.name,
@@ -101,7 +101,7 @@ router.post('/login', async (req, res) => {
 
     console.log(`[Auth] User ${user.name} logged in. Total visits: ${newVisitCount}`);
 
-    // Redirect to saved path or dashboard based on role, avoiding role-mismatch 403 locks
+    
     let redirectUrl = req.session.redirectTo;
     delete req.session.redirectTo;
 
@@ -123,7 +123,7 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// Logout
+
 router.get('/logout', (req, res) => {
   req.session.destroy((err) => {
     if (err) {

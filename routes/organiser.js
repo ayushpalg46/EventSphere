@@ -1,5 +1,5 @@
-// routes/organiser.js
-// Organiser Dashboard, Event Creation, Attendees list CSV export, and Refunds management
+
+
 
 const express = require('express');
 const router = express.Router();
@@ -8,16 +8,16 @@ const { isLoggedIn, isOrganiser } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 const { exportAttendeesToCSV } = require('../utils/csvExporter');
 
-// Apply middleware to organiser routes in this router
+
 router.use('/organiser', isLoggedIn, isOrganiser);
 
-// Organiser Dashboard
+
 router.get('/organiser/dashboard', async (req, res) => {
   const organiserId = req.session.user.id;
   try {
-    // Run dashboard queries concurrently to reduce page load latency
+    
     const [events, stats, payouts] = await Promise.all([
-      // 1. Get all events created by organiser (excluding huge columns like banner_image/description/agenda/speakers/faq)
+      
       dbQuery.all(
         `SELECT e.id, e.title, e.category, e.venue_name, e.city, e.start_date, e.status, e.created_at, 
          (SELECT SUM(capacity) FROM ticket_types WHERE event_id = e.id) as total_capacity,
@@ -25,7 +25,7 @@ router.get('/organiser/dashboard', async (req, res) => {
          FROM events e WHERE e.organiser_id = ? ORDER BY e.created_at DESC`,
         [organiserId]
       ),
-      // 2. Calculate global analytics metrics
+      
       dbQuery.get(
         `SELECT 
          COUNT(DISTINCT e.id) as event_count,
@@ -38,7 +38,7 @@ router.get('/organiser/dashboard', async (req, res) => {
          WHERE e.organiser_id = ?`,
         [organiserId]
       ),
-      // 3. Payout summary
+      
       dbQuery.all(
         `SELECT p.id, p.amount, p.status, p.payout_date, e.title as event_title 
          FROM payouts p 
@@ -55,18 +55,18 @@ router.get('/organiser/dashboard', async (req, res) => {
   }
 });
 
-// GET Create Event Page
+
 router.get('/organiser/create-event', (req, res) => {
   res.render('organiser/create-event', { error: null });
 });
 
-// POST Create Event - Handles files and multi-tier tickets
+
 router.post('/organiser/create-event', upload.single('banner_image'), async (req, res) => {
   const organiserId = req.session.user.id;
   const body = req.body;
   const { title, description, category, venue_name, venue_address, city, is_online, online_link, start_date, end_date } = body;
 
-  // Support both standard bracketed and non-bracketed field names
+  
   const ticket_names = body.ticket_names || body['ticket_names[]'];
   const ticket_prices = body.ticket_prices || body['ticket_prices[]'];
   const ticket_capacities = body.ticket_capacities || body['ticket_capacities[]'];
@@ -83,7 +83,7 @@ router.post('/organiser/create-event', upload.single('banner_image'), async (req
   const faq_answers = body.faq_answers || body['faq_answers[]'];
 
   let banner_image = 'default_event.jpg';
-  // Prioritize the highly-compressed client-side image string if present
+  
   if (body.banner_image_base64 && body.banner_image_base64.startsWith('data:image')) {
     banner_image = body.banner_image_base64;
   } else if (req.file) {
@@ -95,7 +95,7 @@ router.post('/organiser/create-event', upload.single('banner_image'), async (req
     }
   }
 
-  // Preloaded category-specific fallback image selection if no image is uploaded
+  
   if (banner_image === 'default_event.jpg') {
     const defaultImages = {
       'Music': 'https://images.unsplash.com/photo-1506157786151-b8491531f063?w=800',
@@ -112,7 +112,7 @@ router.post('/organiser/create-event', upload.single('banner_image'), async (req
   }
 
   try {
-    // Parse Agenda JSON safely
+    
     const agenda = [];
     if (agenda_times && agenda_titles) {
       if (Array.isArray(agenda_times)) {
@@ -128,7 +128,7 @@ router.post('/organiser/create-event', upload.single('banner_image'), async (req
       }
     }
 
-    // Parse Speakers JSON safely
+    
     const speakers = [];
     if (speaker_names && speaker_titles) {
       if (Array.isArray(speaker_names)) {
@@ -144,7 +144,7 @@ router.post('/organiser/create-event', upload.single('banner_image'), async (req
       }
     }
 
-    // Parse FAQs JSON safely
+    
     const faq = [];
     if (faq_questions && faq_answers) {
       if (Array.isArray(faq_questions)) {
@@ -160,7 +160,7 @@ router.post('/organiser/create-event', upload.single('banner_image'), async (req
       }
     }
 
-    // Insert Event Row
+    
     const result = await dbQuery.run(
       `INSERT INTO events (organiser_id, title, description, category, banner_image, venue_name, venue_address, city, is_online, online_link, start_date, end_date, agenda, speakers, faq, status)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'upcoming')`,
@@ -174,7 +174,7 @@ router.post('/organiser/create-event', upload.single('banner_image'), async (req
 
     const eventId = result.id;
 
-    // Add Ticket Types Tiers in parallel
+    
     if (ticket_names) {
       if (Array.isArray(ticket_names)) {
         const ticketPromises = [];
@@ -226,7 +226,7 @@ router.post('/organiser/create-event', upload.single('banner_image'), async (req
   }
 });
 
-// Manage Specific Event page
+
 router.get('/organiser/events/:id', async (req, res) => {
   const eventId = req.params.id;
   const organiserId = req.session.user.id;
@@ -239,7 +239,7 @@ router.get('/organiser/events/:id', async (req, res) => {
 
     const ticketTypes = await dbQuery.all('SELECT * FROM ticket_types WHERE event_id = ?', [eventId]);
 
-    // Fetch registered attendees
+    
     const attendees = await dbQuery.all(
       `SELECT b.id as booking_id, u.name, u.email, u.phone, t.name as ticket_type, 
        b.quantity, b.total_amount, b.payment_id, b.payment_status, b.checked_in, b.checkin_time, b.created_at as booked_at
@@ -250,7 +250,7 @@ router.get('/organiser/events/:id', async (req, res) => {
       [eventId]
     );
 
-    // Calculate details
+    
     const totalRevenue = attendees.reduce((acc, curr) => curr.payment_status === 'paid' ? acc + curr.total_amount : acc, 0);
     const totalCheckedIn = attendees.reduce((acc, curr) => curr.checked_in ? acc + curr.quantity : acc, 0);
     const totalBooked = attendees.reduce((acc, curr) => acc + curr.quantity, 0);
@@ -268,7 +268,7 @@ router.get('/organiser/events/:id', async (req, res) => {
   }
 });
 
-// CSV Export route for specific event
+
 router.get('/organiser/events/:id/export-csv', async (req, res) => {
   const eventId = req.params.id;
   const organiserId = req.session.user.id;
@@ -291,7 +291,7 @@ router.get('/organiser/events/:id/export-csv', async (req, res) => {
 
     const csvContent = exportAttendeesToCSV(attendees);
 
-    // Set Response Headers for direct browser download
+    
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', `attachment; filename=attendees-event-${eventId}.csv`);
     res.status(200).send(csvContent);
@@ -302,7 +302,7 @@ router.get('/organiser/events/:id/export-csv', async (req, res) => {
   }
 });
 
-// Simulate Organiser Payout simulation
+
 router.post('/organiser/events/:id/request-payout', async (req, res) => {
   const eventId = req.params.id;
   const organiserId = req.session.user.id;
@@ -313,13 +313,13 @@ router.post('/organiser/events/:id/request-payout', async (req, res) => {
       return res.status(403).send('Unauthorized');
     }
 
-    // Check if payout already requested/processed
+    
     const existingPayout = await dbQuery.get('SELECT * FROM payouts WHERE event_id = ?', [eventId]);
     if (existingPayout) {
       return res.redirect(`/organiser/events/${eventId}?payout_error=Payout already processed or requested.`);
     }
 
-    // Get total tickets revenue
+    
     const revenueRow = await dbQuery.get(
       `SELECT SUM(total_amount) as total FROM bookings WHERE event_id = ? AND payment_status = 'paid'`,
       [eventId]
@@ -330,10 +330,10 @@ router.post('/organiser/events/:id/request-payout', async (req, res) => {
       return res.redirect(`/organiser/events/${eventId}?payout_error=Cannot request payout for Rs. 0.`);
     }
 
-    // Create payout row
+    
     await dbQuery.run(
       `INSERT INTO payouts (organiser_id, event_id, amount, status, payout_date)
-       VALUES (?, ?, ?, 'processed', NOW())`, // Sandbox processes instantly!
+       VALUES (?, ?, ?, 'processed', NOW())`, 
       [organiserId, eventId, amount]
     );
 
@@ -345,7 +345,7 @@ router.post('/organiser/events/:id/request-payout', async (req, res) => {
   }
 });
 
-// Manage Refund Requests Page
+
 router.get('/organiser/refunds', async (req, res) => {
   const organiserId = req.session.user.id;
   try {
@@ -366,14 +366,14 @@ router.get('/organiser/refunds', async (req, res) => {
   }
 });
 
-// POST Approve or Reject Refund
+
 router.post('/organiser/refunds/:bookingId', async (req, res) => {
   const bookingId = req.params.bookingId;
-  const { action } = req.body; // 'approve' or 'reject'
+  const { action } = req.body; 
   const organiserId = req.session.user.id;
 
   try {
-    // Verify booking belongs to organiser's event
+    
     const booking = await dbQuery.get(
       `SELECT b.*, e.title as event_title, e.organiser_id
        FROM bookings b
@@ -387,17 +387,17 @@ router.post('/organiser/refunds/:bookingId', async (req, res) => {
     }
 
     if (action === 'approve') {
-      // 1. Update booking payment_status & refund_status
+      
       await dbQuery.run(
         `UPDATE bookings SET payment_status = 'refunded', refund_status = 'approved' WHERE id = ?`,
         [bookingId]
       );
-      // 2. Restore ticket capacity
+      
       await dbQuery.run(
         `UPDATE ticket_types SET sold = MAX(0, sold - ?) WHERE id = ?`,
         [booking.quantity, booking.ticket_type_id]
       );
-      // 3. Send Notification to User
+      
       await dbQuery.run(
         `INSERT INTO notifications (user_id, message)
          VALUES (?, ?)`,
@@ -407,7 +407,7 @@ router.post('/organiser/refunds/:bookingId', async (req, res) => {
         ]
       );
     } else {
-      // Reject
+      
       await dbQuery.run(
         `UPDATE bookings SET refund_status = 'rejected' WHERE id = ?`,
         [bookingId]
@@ -430,19 +430,19 @@ router.post('/organiser/refunds/:bookingId', async (req, res) => {
   }
 });
 
-// POST Delete Event
+
 router.post('/organiser/events/:id/delete', async (req, res) => {
   const eventId = req.params.id;
   const organiserId = req.session.user.id;
 
   try {
-    // Verify event belongs to organiser
+    
     const event = await dbQuery.get('SELECT id FROM events WHERE id = ? AND organiser_id = ?', [eventId, organiserId]);
     if (!event) {
       return res.status(403).send('Unauthorized to delete this event.');
     }
 
-    // Delete associated entries manually to prevent foreign key constraint violations
+    
     await dbQuery.run('DELETE FROM payouts WHERE event_id = ?', [eventId]);
     await dbQuery.run('DELETE FROM bookings WHERE event_id = ?', [eventId]);
     await dbQuery.run('DELETE FROM events WHERE id = ? AND organiser_id = ?', [eventId, organiserId]);

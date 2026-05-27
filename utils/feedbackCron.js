@@ -1,19 +1,16 @@
-// utils/feedbackCron.js
-// Automated Background Worker for sending Feedback Request Emails post-event.
+
+
 
 const { dbQuery } = require('../database/db');
 const { sendEmail } = require('./emailSender');
 
-/**
- * Scans database for attendees of events that ended at least 2 hours ago,
- * dispatches feedback reminder emails, and updates status flags.
- */
+
 async function checkAndSendFeedbackEmails() {
   console.log('[Feedback Cron] Checking for events that ended more than 2 hours ago...');
   try {
     const appUrl = process.env.APP_URL || 'http://localhost:3000';
     
-    // Select paid bookings of events that ended at least 2 hours ago where feedback hasn't been requested
+    
     const pendingBookings = await dbQuery.all(
       `SELECT b.id as booking_id, b.user_id, b.event_id, u.name as user_name, u.email as user_email, e.title as event_title
        FROM bookings b
@@ -65,13 +62,13 @@ async function checkAndSendFeedbackEmails() {
       });
 
       if (emailSent) {
-        // Mark feedback_sent = 1 for the booking
+        
         await dbQuery.run(
           'UPDATE bookings SET feedback_sent = 1 WHERE id = ?',
           [booking.booking_id]
         );
 
-        // Add a corresponding in-app notification
+        
         await dbQuery.run(
           `INSERT INTO notifications (user_id, message) 
            VALUES (?, ?)`,
@@ -88,16 +85,14 @@ async function checkAndSendFeedbackEmails() {
   }
 }
 
-/**
- * Initializes and starts the background feedback scheduler loop.
- */
+
 function startFeedbackCron() {
   console.log('[Feedback Cron] Initializing background feedback scheduler loop...');
   
-  // Run an initial scan immediately on server start to catch any events that ended while the server was offline
-  setTimeout(checkAndSendFeedbackEmails, 5000); // 5s delay to ensure DB tables/migrations are fully initialized
   
-  // Check every 5 minutes (300,000 milliseconds)
+  setTimeout(checkAndSendFeedbackEmails, 5000); 
+  
+  
   setInterval(checkAndSendFeedbackEmails, 5 * 60 * 1000);
 }
 

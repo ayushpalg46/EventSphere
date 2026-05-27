@@ -1,31 +1,26 @@
-// utils/emailSender.js
-// Email Notification Service with sandbox fallback.
+
+
 
 const nodemailer = require('nodemailer');
 const fs = require('fs');
 const path = require('path');
 
-// Ensure folder for simulated emails exists so we can inspect them during testing
+
 const mailBoxDir = path.join(__dirname, '../scratch/simulated_emails');
 if (!fs.existsSync(mailBoxDir)) {
   fs.mkdirSync(mailBoxDir, { recursive: true });
 }
 
-/**
- * Sends booking confirmation email or simulates it in development mode
- * @param {string} to Email address of recipient
- * @param {string} subject Email subject
- * @param {string} htmlBody HTML email contents
- */
+
 async function sendEmail({ to, subject, htmlBody }) {
   console.log(`[Email Service] Attempting to send email to ${to} with subject: "${subject}"`);
 
-  // Check if SMTP details are provided in environment
+  
   const user = process.env.EMAIL_USER;
   const pass = process.env.EMAIL_PASS;
   const host = process.env.EMAIL_HOST;
   const port = parseInt(process.env.EMAIL_PORT, 10) || 587;
-  const secure = process.env.EMAIL_SECURE === 'true'; // true for port 465, false for 587
+  const secure = process.env.EMAIL_SECURE === 'true'; 
   const from = process.env.EMAIL_FROM || `"EventSphere Support" <${user}>`;
 
   if (user && pass && user !== 'your_gmail@gmail.com' && user !== '') {
@@ -33,7 +28,7 @@ async function sendEmail({ to, subject, htmlBody }) {
       let transporterOpts = {};
 
       if (host) {
-        // Custom SMTP Configuration (SendGrid, Mailgun, custom server)
+        
         transporterOpts = {
           host: host,
           port: port,
@@ -44,7 +39,7 @@ async function sendEmail({ to, subject, htmlBody }) {
           }
         };
       } else {
-        // Fallback to Gmail default service
+        
         transporterOpts = {
           service: 'gmail',
           auth: {
@@ -71,7 +66,7 @@ async function sendEmail({ to, subject, htmlBody }) {
     }
   }
 
-  // Fallback: Simulator mode. Save the email as a file and print log.
+  
   try {
     const filename = `email-${Date.now()}-${to.replace(/[@.]/g, '_')}.html`;
     const filepath = path.join(mailBoxDir, filename);

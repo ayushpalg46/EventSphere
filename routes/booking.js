@@ -1,5 +1,5 @@
-// routes/booking.js
-// Event ticket booking and payment sandbox routes
+
+
 
 const express = require('express');
 const router = express.Router();
@@ -8,7 +8,7 @@ const { isLoggedIn } = require('../middleware/auth');
 const { generateQRCode } = require('../utils/qrGenerator');
 const { sendEmail } = require('../utils/emailSender');
 
-// GET Checkout Page
+
 router.get('/booking/checkout', isLoggedIn, (req, res) => {
   const order = req.session.checkoutOrder;
   if (!order) {
@@ -33,25 +33,25 @@ router.get('/booking/checkout', isLoggedIn, (req, res) => {
   });
 });
 
-// POST Pay - Simulate payment gateway completion
+
 router.post('/booking/pay', isLoggedIn, async (req, res) => {
   const order = req.session.checkoutOrder;
   if (!order) {
     return res.status(400).send('Session expired. Go back and select tickets again.');
   }
 
-  // Simulate payment processor response
+  
   const paymentId = 'pay_sandbox_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
 
   try {
     const bookingIds = [];
 
     for (let item of order.items) {
-      // 1. Create a unique QR token
+      
       const qrToken = `TICKET-${order.event_id}-${item.ticket_type_id}-${req.session.user.id}-${Date.now()}`;
       const qrCodeDataUrl = await generateQRCode(qrToken);
 
-      // 2. Insert booking row
+      
       const result = await dbQuery.run(
         `INSERT INTO bookings (user_id, event_id, ticket_type_id, quantity, total_amount, payment_id, payment_status, qr_code)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -62,20 +62,20 @@ router.post('/booking/pay', isLoggedIn, async (req, res) => {
           item.quantity,
           item.total,
           paymentId,
-          'paid', // Sandbox payment auto-confirmed
-          qrCodeDataUrl // Base64 QR Image stored directly!
+          'paid', 
+          qrCodeDataUrl 
         ]
       );
       bookingIds.push(result.id);
 
-      // 3. Update sold ticket capacity
+      
       await dbQuery.run(
         `UPDATE ticket_types SET sold = sold + ? WHERE id = ?`,
         [item.quantity, item.ticket_type_id]
       );
     }
 
-    // 4. Send Confirmation Notification in App
+    
     await dbQuery.run(
       `INSERT INTO notifications (user_id, message)
        VALUES (?, ?)`,
@@ -85,7 +85,7 @@ router.post('/booking/pay', isLoggedIn, async (req, res) => {
       ]
     );
 
-    // 5. Simulate Email sending
+    
     const attendeeEmail = req.session.user.email;
     const htmlEmail = `
       <div style="font-family: Arial, sans-serif; background-color: #121212; color: #ffffff; padding: 20px; border-radius: 8px;">
@@ -99,7 +99,7 @@ router.post('/booking/pay', isLoggedIn, async (req, res) => {
         <p>Thank you for choosing EventSphere!</p>
       </div>
     `;
-    // Send email confirmation in the background (non-blocking) to prevent SMTP delay hangs
+    
     sendEmail({
       to: attendeeEmail,
       subject: `Ticket Confirmed: ${order.event_title}`,
@@ -108,7 +108,7 @@ router.post('/booking/pay', isLoggedIn, async (req, res) => {
       console.error('[Background Email Error]', err);
     });
 
-    // Clear session checkout order
+    
     delete req.session.checkoutOrder;
 
     res.redirect(`/booking/confirm?paymentId=${paymentId}`);
@@ -129,7 +129,7 @@ router.post('/booking/pay', isLoggedIn, async (req, res) => {
   }
 });
 
-// GET Booking Confirmation Page
+
 router.get('/booking/confirm', isLoggedIn, async (req, res) => {
   const paymentId = req.query.paymentId;
   if (!paymentId) {
@@ -157,7 +157,7 @@ router.get('/booking/confirm', isLoggedIn, async (req, res) => {
   }
 });
 
-// GET Select Tickets Page
+
 router.get('/booking/:eventId', isLoggedIn, async (req, res) => {
   const eventId = req.params.eventId;
   try {
@@ -168,7 +168,7 @@ router.get('/booking/:eventId', isLoggedIn, async (req, res) => {
 
     const ticketTypes = await dbQuery.all('SELECT * FROM ticket_types WHERE event_id = ?', [eventId]);
     
-    // Process early bird availability for pricing view
+    
     const now = new Date();
     ticketTypes.forEach(ticket => {
       ticket.isEarlyBirdActive = false;
@@ -197,7 +197,7 @@ router.get('/booking/:eventId', isLoggedIn, async (req, res) => {
   }
 });
 
-// POST Select Tickets - Calculates price and redirects to Checkout
+
 router.post('/booking/:eventId', isLoggedIn, async (req, res) => {
   const eventId = req.params.eventId;
   const discountCode = req.body.discount_code ? req.body.discount_code.trim().toUpperCase() : '';
@@ -223,7 +223,7 @@ router.post('/booking/:eventId', isLoggedIn, async (req, res) => {
 
       hasTickets = true;
 
-      // Check capacity
+      
       if (ticket.sold + qty > ticket.capacity) {
         return res.render('booking/select', {
           event,
@@ -232,7 +232,7 @@ router.post('/booking/:eventId', isLoggedIn, async (req, res) => {
         });
       }
 
-      // Check early bird pricing
+      
       let pricePerTicket = ticket.price;
       let usingEarlyBird = false;
       if (ticket.early_bird_price && ticket.early_bird_expiry) {
@@ -246,7 +246,7 @@ router.post('/booking/:eventId', isLoggedIn, async (req, res) => {
       const itemTotal = pricePerTicket * qty;
       subtotal += itemTotal;
 
-      // Check if ticket-specific code is applied
+      
       let discountApplied = 0;
       if (discountCode && ticket.discount_code && ticket.discount_code.toUpperCase() === discountCode) {
         discountApplied = (itemTotal * ticket.discount_percent) / 100;
@@ -272,7 +272,7 @@ router.post('/booking/:eventId', isLoggedIn, async (req, res) => {
       });
     }
 
-    // Save transaction summary to session
+    
     req.session.checkoutOrder = {
       event_id: eventId,
       event_title: event.title,

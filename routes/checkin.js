@@ -1,15 +1,15 @@
-// routes/checkin.js
-// QR Code Scan & Attendee Check-In system panel
+
+
 
 const express = require('express');
 const router = express.Router();
 const { dbQuery } = require('../database/db');
 const { isLoggedIn, isOrganiser } = require('../middleware/auth');
 
-// Apply auth middleware to check-in routes
+
 router.use('/organiser/checkin', isLoggedIn, isOrganiser);
 
-// GET check-in panel for an event
+
 router.get('/organiser/checkin/:eventId', async (req, res) => {
   const eventId = req.params.eventId;
   const organiserId = req.session.user.id;
@@ -20,7 +20,7 @@ router.get('/organiser/checkin/:eventId', async (req, res) => {
       return res.status(404).send('Event not found or unauthorized.');
     }
 
-    // Get live stats: total registered vs checked in
+    
     const stats = await dbQuery.get(
       `SELECT 
        COALESCE(SUM(quantity), 0) as total_registered,
@@ -37,11 +37,11 @@ router.get('/organiser/checkin/:eventId', async (req, res) => {
   }
 });
 
-// POST to perform checkin (simulating QR scan by entering booking ID or token)
+
 router.post('/organiser/checkin/:eventId', async (req, res) => {
   const eventId = req.params.eventId;
   const organiserId = req.session.user.id;
-  const { qrToken } = req.body; // Can be booking ID or raw QR Token string
+  const { qrToken } = req.body; 
 
   const wantsJson = req.headers['accept'] === 'application/json' || req.headers['content-type'] === 'application/json';
 
@@ -52,7 +52,7 @@ router.post('/organiser/checkin/:eventId', async (req, res) => {
       return res.status(403).send('Unauthorized');
     }
 
-    // Get stats for rendering the page fallback
+    
     const getStats = async () => {
       return await dbQuery.get(
         `SELECT 
@@ -66,9 +66,9 @@ router.post('/organiser/checkin/:eventId', async (req, res) => {
 
     let booking = null;
 
-    // Check if token matches standard qr_code field
+    
     if (isNaN(qrToken)) {
-      // Find by matching the generated QR Code string (stored as Base64/token text)
+      
       booking = await dbQuery.get(
         `SELECT b.*, u.name as user_name, u.email as user_email, u.phone as user_phone, u.profile_pic as user_profile_pic, t.name as ticket_name 
          FROM bookings b
@@ -78,7 +78,7 @@ router.post('/organiser/checkin/:eventId', async (req, res) => {
         [eventId, `%${qrToken}%`]
       );
     } else {
-      // Find by numeric Booking ID
+      
       booking = await dbQuery.get(
         `SELECT b.*, u.name as user_name, u.email as user_email, u.phone as user_phone, u.profile_pic as user_profile_pic, t.name as ticket_name 
          FROM bookings b
@@ -143,7 +143,7 @@ router.post('/organiser/checkin/:eventId', async (req, res) => {
       });
     }
 
-    // Mark as checked in
+    
     await dbQuery.run(
       `UPDATE bookings 
        SET checked_in = 1, checkin_time = NOW() 
@@ -185,7 +185,7 @@ router.post('/organiser/checkin/:eventId', async (req, res) => {
   }
 });
 
-// JSON API for live counter statistics (Frontend can fetch/poll this!)
+
 router.get('/organiser/checkin/:eventId/stats', async (req, res) => {
   const eventId = req.params.eventId;
   const organiserId = req.session.user.id;

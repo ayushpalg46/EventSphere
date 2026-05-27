@@ -1,11 +1,7 @@
-// utils/csvExporter.js
-// Quick CSV Exporter
 
-/**
- * Converts attendee list object array to a raw CSV string
- * @param {Array} attendees List of attendees with details
- * @returns {string} Raw CSV contents
- */
+
+
+
 function exportAttendeesToCSV(attendees) {
   if (!attendees || attendees.length === 0) {
     return 'Booking ID,Name,Email,Phone,Ticket Type,Quantity,Paid,Payment ID,Status,Checked In,Check-in Time,Booked Date\n';
@@ -27,7 +23,7 @@ function exportAttendeesToCSV(attendees) {
   ];
 
   const rows = attendees.map(att => {
-    // Escape double quotes in names and values
+    
     const escapeCsv = (val) => {
       if (val === null || val === undefined) return '';
       const str = String(val);

@@ -1,5 +1,5 @@
-// database/seed.js
-// Seed database with initial schema and sample events data
+
+
 
 const fs = require('fs');
 const path = require('path');
@@ -9,12 +9,12 @@ const { db, dbQuery } = require('./db');
 async function seed() {
   console.log('Seeding started...');
   
-  // Read schema file
+  
   const schemaPath = path.join(__dirname, 'schema.sql');
   const schemaSql = fs.readFileSync(schemaPath, 'utf8');
   
   try {
-    // Drop existing tables just in case we are rebuilding (helpful for debugging)
+    
     console.log('Clearing old database tables if they exist...');
     await dbQuery.exec(`
       DROP TABLE IF EXISTS notifications;
@@ -28,17 +28,17 @@ async function seed() {
       DROP TABLE IF EXISTS users;
     `);
     
-    // Execute schema SQL to create tables
+    
     console.log('Creating tables...');
-    // sqlite3 exec handles multiple statements
+    
     await dbQuery.exec(schemaSql);
     console.log('Tables created successfully.');
     
-    // Generate hashed passwords
+    
     const salt = bcrypt.genSaltSync(10);
     const hashedPassword = bcrypt.hashSync('password123', salt);
     
-    // Insert Users
+    
     console.log('Inserting sample users...');
     const orgId = (await dbQuery.run(
       `INSERT INTO users (name, email, password, role, phone, address, city, linkedin_url, share_linkedin)
@@ -74,7 +74,7 @@ async function seed() {
 
     console.log(`Created Organizer ID: ${orgId}, Attendee ID: ${attendeeId}`);
     
-    // Sample Events Details
+    
     const eventsData = [
       {
         title: 'Sunburn Festival Goa 2026',
@@ -162,7 +162,7 @@ async function seed() {
       }
     ];
 
-    // Insert Events and Ticket Types
+    
     for (const event of eventsData) {
       const result = await dbQuery.run(
         `INSERT INTO events (organiser_id, title, description, category, banner_image, venue_name, venue_address, city, is_online, online_link, start_date, end_date, agenda, speakers, faq, status)
@@ -189,9 +189,9 @@ async function seed() {
       const newEventId = result.id;
       console.log(`Inserted event: ${event.title} with ID: ${newEventId}`);
       
-      // Insert Ticket Types for this event
+      
       if (event.category === 'Music') {
-        // VIP, General, Early Bird
+        
         await dbQuery.run(
           `INSERT INTO ticket_types (event_id, name, price, capacity, sold, discount_code, discount_percent, early_bird_price, early_bird_expiry)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -213,7 +213,7 @@ async function seed() {
            VALUES (?, ?, ?, ?, ?)`
           ,[newEventId, 'Front Row VIP', 1499, 50, 0]
         );
-      } else { // Tech Hackathon (Free)
+      } else { 
         await dbQuery.run(
           `INSERT INTO ticket_types (event_id, name, price, capacity, sold)
            VALUES (?, ?, ?, ?, ?)`,
@@ -222,8 +222,8 @@ async function seed() {
       }
     }
 
-    // Insert a dummy review for Sunburn to test review sections
-    const sunburnId = 1; // since it is first inserted event
+    
+    const sunburnId = 1; 
     await dbQuery.run(
       `INSERT INTO reviews (user_id, event_id, rating, comment)
        VALUES (?, ?, ?, ?)`,
