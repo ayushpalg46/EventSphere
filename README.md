@@ -1,45 +1,113 @@
-# EventSphere — End-to-End Event Management & Ticketing Platform
+# EventSphere
 
-Welcome to **EventSphere**, a complete full-stack event discovery, booking, and check-in platform. This project was developed as a submission for our college hackathon challenge.
+A simple event booking and management platform made for students and small event organizers.
+This project was created to make event discovery and ticket booking easier in one place.
 
-It features a high-contrast dark space design, interactive ticket selector/checkout screens, sandbox payment simulations, and client-side check-in poll trackers.
-
----
-
-## Design System & Aesthetic Reference
-This interface is inspired by high-contrast futuristic dark modes, utilizing a quad-color block palette:
-- **Primary Void**: Pure Black `#000000` (used for standard backgrounds)
-- **High Signal**: High-contrast White `#ffffff` (for readability)
-- **Alert Accent**: Vibrant Crimson `#ff0033` (primary CTAs & notifications)
-- **Warning Highlight**: Electric Yellow `#ffff00` (hover states & secondary items)
-- **Typography**: The geometric sans-serif **Sora** font family is used globally.
-- **Strict Sharp Edges**: All border-radii properties on cards, forms, inputs, and buttons are set to `0px` to maintain a monolithic, precise structure.
-- **Wireframe Atmosphere**: A slow-moving 3D perspective wireframe grid flows in the background.
+🌐 **Live Website**: [https://eventsphere-f6yl.onrender.com](https://eventsphere-f6yl.onrender.com)
 
 ---
 
-## Core Features Implemented
+### About The Project
 
-### 1. Event Creation & Management (Organiser Side)
-- **Dynamic Event Creator**: Support for category filters, physical venues, or virtual/online stream links.
-- **Multi-Tier Ticket releases**: Add multiple pricing tiers (General, VIP, Early Bird) with custom capacities, individual coupon codes, and early bird pricing expiry schedules.
-- **Organiser Management Portal**: gross ticket revenue analytics, list of registrations, simulated payouts, and attendee list download (CSV format).
-- **Refund Requests Flow**: View refund requests, and approve or reject them. Approving automatically restores ticket release capacity.
+EventSphere is a web-based platform where users can explore events, book tickets, and manage event details easily.
+The main goal of this project was to create a clean and simple platform that solves the problem of finding and managing events online.
 
-### 2. Event Discovery & Ticketing (Attendee Side)
-- **Browse & Filters**: Browse active events, search keywords, or filter by category, city, price range, and date limits (Today, Tomorrow, Weekend, 30 days).
-- **Rich Event details page**: Displays schedule timelines, speaker avatars, FAQs, reviews, and attendee LinkedIn networking cards.
-- **Wishlist & Reminders**: Wishlist events directly. Simulates reminders by pushing database notifications.
-- **Simulated Payment Gateway**: Seamless integration of a mock **Razorpay Secure Checkout Portal**. Input card/UPI details and experience bank authentication OTP screens with loading spinners.
-- **Printable Entry Passes**: Access Base64 QR-code entry tickets, and print/save them directly as PDFs.
+This project helped me learn full stack web development, frontend design, backend integration, database handling, and deployment.
 
-### 3. Live Check-In Desk
-- Organisers can load the check-in panel on show day.
-- Simulates scanning by entering Booking IDs or QR tokens.
-- Short-polling AJAX requests keep the live checked-in counter and registration percentages updated in real-time.
+---
 
-### 4. AI-Powered Assistants (Gemini API)
-- **AI Event Description**: Organiser enters bullet points $\rightarrow$ calls Gemini API to draft engaging description pages.
-- **Smart Schedule Builder**: Reorders session times for optimal audience flow based on speaker names $\rightarrow$ parses JSON responses.
-- *Includes pre-configured offline HTML template fallbacks if no Gemini API keys are active.*
+### Features
 
+- User Registration & Login
+- Browse Upcoming Events
+- Event Details Page
+- Ticket Booking System
+- Responsive Design
+- Simple and Clean UI
+- Backend Database Integration
+- Hosted Online using Render
+
+---
+
+### Tech Stack
+
+#### Frontend
+- HTML
+- CSS
+- JavaScript
+- React.js
+
+#### Backend
+- Node.js
+- Express.js
+
+#### Database
+- MongoDB
+
+#### Deployment
+- Render
+
+---
+
+### Screenshots
+
+![Home Page](./screenshots/home.png)
+*Home Page with search filters and event categories.*
+
+![Event Page](./screenshots/event.png)
+*Event details page showing event info, date, venue map, and action buttons.*
+
+![Support Page](./screenshots/support.png)
+*Support & Helpline Centre with FAQ section and ticket submission form.*
+
+![Meet the Team](./screenshots/team.png)
+*Developer profile cards for the project authors.*
+
+---
+
+### Learning Outcomes
+ 
+While building this project, I learned:
+
+- How frontend and backend connect together
+- API handling
+- Authentication basics
+- Database operations
+- Deployment process
+- Debugging real project issues
+
+---
+
+### Future Improvements
+
+- Payment Gateway Integration
+- QR Based Ticket Verification
+- Admin Dashboard
+- Event Analytics
+- Email Notifications
+- Better UI Animations
+
+---
+
+### Challenges Faced
+
+- Connecting frontend with backend
+- Managing database schemas
+- Fixing deployment issues
+- Making the website responsive
+
+---
+
+### Conclusion
+
+EventSphere is a beginner-friendly full stack project that helped me improve my development skills and understand how real-world event booking platforms work.
+
+This project is still under development and more features will be added in the future.
+
+---
+
+### Author
+
+Made by Ayush & Tanish
+
+GitHub: [GitHub](https://github.com)
