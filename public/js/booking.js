@@ -1,7 +1,3 @@
-// public/js/booking.js
-// Dynamically updates totals on ticket selection screen
-// Created by Ayush
-
 document.addEventListener('DOMContentLoaded', () => {
   const qtyInputs = document.querySelectorAll('.ticket-qty-input');
   const subtotalDisplay = document.getElementById('calc-subtotal');
@@ -24,7 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const itemTotal = price * qty;
       subtotal += itemTotal;
 
-      // Check if discount code matches input
       const enteredCode = discountCodeInput ? discountCodeInput.value.trim().toUpperCase() : '';
       if (enteredCode && discountCode.toUpperCase() === enteredCode) {
         const itemDiscount = (itemTotal * discountPercent) / 100;
@@ -64,7 +59,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const ticketRow = matchedInput.closest('.ticket-select-row');
       const ticketName = ticketRow ? ticketRow.querySelector('h3').textContent : 'this tier';
       
-      // Auto-select 1 ticket if they click "Apply" and haven't selected anything yet
       let qty = parseInt(matchedInput.value) || 0;
       let totalQty = 0;
       qtyInputs.forEach(input => {
@@ -93,18 +87,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Bind change events to quantity controls
   qtyInputs.forEach(input => {
     input.addEventListener('change', () => {
-      // Prevent negative values
       if (parseInt(input.value) < 0) input.value = 0;
       calculateTotals();
       updatePromoMessage(false);
     });
-
   });
 
-  // Promo code button
   if (applyPromoBtn) {
     applyPromoBtn.addEventListener('click', (e) => {
       e.preventDefault();
@@ -113,7 +103,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Also listen for typing in the promo code input to update message dynamically
   if (discountCodeInput) {
     discountCodeInput.addEventListener('input', () => {
       updatePromoMessage(false);
@@ -121,6 +110,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Initial calculation
   calculateTotals();
 });

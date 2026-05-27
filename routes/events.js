@@ -1,6 +1,5 @@
 // routes/events.js
 // Browse, search, filter and detail page of events
-// Created by Ayush
 
 const express = require('express');
 const router = express.Router();

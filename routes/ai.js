@@ -1,13 +1,8 @@
-// routes/ai.js
-// AI Features Route using Google Gemini API (with template fallback for offline/development test)
-// Created by Ayush
-
 const express = require('express');
 const router = express.Router();
 const { dbQuery } = require('../database/db');
 const { isLoggedIn } = require('../middleware/auth');
 
-// Endpoint: AI-Generated Description
 router.post('/ai/generate-description', isLoggedIn, async (req, res) => {
   const { bulletPoints, category, title } = req.body;
 
@@ -18,15 +13,12 @@ router.post('/ai/generate-description', isLoggedIn, async (req, res) => {
   const apiKey = process.env.GEMINI_API_KEY;
   const prompt = `You are a professional copywriter. Write a highly engaging, immersive and descriptive event description page for an event named "${title || 'EventSphere Event'}" under the category "${category || 'General'}". Here are the key bullet points of the event details:\n${bulletPoints}\n\nFormat the response as a clean HTML snippet with proper headings, paragraphs, and lists. Do not write markdown code blocks (e.g. do not include \`\`\`html tags). Make it sound professional, exciting and attractive to ticket buyers.`;
 
-  // Check if API key is valid or dummy
   if (!apiKey || apiKey.includes('Dummy') || apiKey.includes('replace')) {
-    console.log('[AI Service] API key is dummy. Using fallback template generator...');
     const fallbackHtml = generateFallbackDescription(title, category, bulletPoints);
     return res.json({ text: fallbackHtml, isFallback: true });
   }
 
   try {
-    // Call Google Gemini 1.5 Flash API directly using native node fetch
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
       {
@@ -50,7 +42,6 @@ router.post('/ai/generate-description', isLoggedIn, async (req, res) => {
     const data = await response.json();
     let textResult = data.candidates[0].content.parts[0].text;
     
-    // Clean up any potential markdown wrapped block
     if (textResult.startsWith('```html')) {
       textResult = textResult.replace(/^```html/, '').replace(/```$/, '');
     } else if (textResult.startsWith('```')) {
@@ -60,16 +51,14 @@ router.post('/ai/generate-description', isLoggedIn, async (req, res) => {
     res.json({ text: textResult.trim(), isFallback: false });
 
   } catch (err) {
-    console.error('[AI Service] Gemini API Call failed:', err.message);
-    // Graceful fallback so program doesn't crash during hackathon demo!
+    console.error('[Service Error] API Call failed:', err.message);
     const fallbackHtml = generateFallbackDescription(title, category, bulletPoints);
     res.json({ text: fallbackHtml, isFallback: true, error: err.message });
   }
 });
 
-// Endpoint: Smart Schedule Builder (suggests optimal Ordering based on flow)
 router.post('/ai/suggest-schedule', isLoggedIn, async (req, res) => {
-  const { sessionsList } = req.body; // Array of objects: { time, title, speaker, description }
+  const { sessionsList } = req.body;
 
   if (!sessionsList || sessionsList.length === 0) {
     return res.status(400).json({ error: 'No sessions provided.' });
@@ -82,7 +71,6 @@ router.post('/ai/suggest-schedule', isLoggedIn, async (req, res) => {
   Do not include markdown tags, code blocks, or extra text. Output strict JSON.`;
 
   if (!apiKey || apiKey.includes('Dummy') || apiKey.includes('replace')) {
-    console.log('[AI Service] API key is dummy. Reordering sessions using basic bubble sort algorithm fallback...');
     const fallbackSchedule = sortSessionsFallback(sessionsList);
     return res.json({ schedule: fallbackSchedule, isFallback: true });
   }
@@ -108,7 +96,6 @@ router.post('/ai/suggest-schedule', isLoggedIn, async (req, res) => {
     const data = await response.json();
     let textResult = data.candidates[0].content.parts[0].text.trim();
 
-    // Clean JSON wrapping
     if (textResult.startsWith('```json')) {
       textResult = textResult.replace(/^```json/, '').replace(/```$/, '');
     } else if (textResult.startsWith('```')) {
@@ -119,18 +106,16 @@ router.post('/ai/suggest-schedule', isLoggedIn, async (req, res) => {
     res.json({ schedule: reorderedList, isFallback: false });
 
   } catch (err) {
-    console.error('[AI Service] Schedule API failed:', err.message);
+    console.error('[Service Error] Schedule API failed:', err.message);
     const fallbackSchedule = sortSessionsFallback(sessionsList);
     res.json({ schedule: fallbackSchedule, isFallback: true, error: err.message });
   }
 });
 
-// Endpoint: AI-Generated Event Recommendations
 router.get('/ai/recommendations', isLoggedIn, async (req, res) => {
   const userId = req.session.user.id;
 
   try {
-    // 1. Find categories of events attended/booked
     const bookedCategories = await dbQuery.all(
       `SELECT DISTINCT e.category FROM bookings b
        JOIN events e ON b.event_id = e.id
@@ -138,7 +123,6 @@ router.get('/ai/recommendations', isLoggedIn, async (req, res) => {
       [userId]
     );
 
-    // 2. Find categories of events wishlisted
     const wishlistedCategories = await dbQuery.all(
       `SELECT DISTINCT e.category FROM wishlist w
        JOIN events e ON w.event_id = e.id
@@ -146,7 +130,6 @@ router.get('/ai/recommendations', isLoggedIn, async (req, res) => {
       [userId]
     );
 
-    // Merge categories
     const categoriesSet = new Set();
     bookedCategories.forEach(c => categoriesSet.add(c.category));
     wishlistedCategories.forEach(c => categoriesSet.add(c.category));
@@ -155,7 +138,6 @@ router.get('/ai/recommendations', isLoggedIn, async (req, res) => {
     let recommendedEvents = [];
 
     if (userCategories.length > 0) {
-      // Find upcoming events matching these categories that user hasn't booked yet
       const placeholders = userCategories.map(() => '?').join(',');
       recommendedEvents = await dbQuery.all(
         `SELECT * FROM events 
@@ -167,7 +149,6 @@ router.get('/ai/recommendations', isLoggedIn, async (req, res) => {
       );
     }
 
-    // If no recommendations are found, fallback to general upcoming popular events
     if (recommendedEvents.length === 0) {
       recommendedEvents = await dbQuery.all(
         `SELECT * FROM events 
@@ -185,8 +166,6 @@ router.get('/ai/recommendations', isLoggedIn, async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch recommendations.' });
   }
 });
-
-// --- FALLBACK LOGIC HELPERS ---
 
 function generateFallbackDescription(title, category, bulletPoints) {
   const points = bulletPoints.split('\n').filter(p => p.trim() !== '');
@@ -211,11 +190,8 @@ function generateFallbackDescription(title, category, bulletPoints) {
 }
 
 function sortSessionsFallback(sessions) {
-  // Simulating schedule builder. Let's sort them alphabetically or put "Keynote" first
   return sessions.map((session, idx) => {
     let suggestedTime = '';
-    
-    // Add dummy slot hours starting from 10:00 AM
     const hour = 10 + idx;
     suggestedTime = `${hour}:00 AM`;
     if (hour >= 12) {

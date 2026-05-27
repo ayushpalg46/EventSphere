@@ -1,6 +1,6 @@
 // utils/qrGenerator.js
 // Tool to generate QR codes for tickets.
-// Teammate's note: We are storing the QR code as a Base64 Data URL, which can be directly shown in <img> tags! So smart.
+
 
 const QRCode = require('qrcode');
 

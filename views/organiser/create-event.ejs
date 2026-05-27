@@ -50,13 +50,19 @@
         <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
           <div>
             <label for="event-category">Category *</label>
-            <select id="event-category" name="category" class="form-control" style="background: var(--bg-secondary); color: white;" required>
+            <input type="hidden" id="event-category-final" name="category" value="Music">
+            <select id="event-category" class="form-control" style="background: var(--bg-secondary); color: white;" required>
               <option value="Music">Music</option>
               <option value="Comedy">Comedy</option>
               <option value="Tech">Tech</option>
               <option value="Movies">Movies</option>
               <option value="Sports">Sports</option>
+              <option value="Other">Custom / Other Category</option>
             </select>
+            <div id="custom-category-group" style="display: none; margin-top: 10px;">
+              <label for="custom-category" style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px; display: block;">Enter Custom Category *</label>
+              <input type="text" id="custom-category" class="form-control" placeholder="e.g. Art & Crafts" style="background: var(--bg-secondary); color: white;">
+            </div>
           </div>
           <div>
             <label for="event-banner">Banner Image (PNG, JPG, WebP) *</label>
@@ -350,6 +356,35 @@
     faqContainer.appendChild(el);
   });
 
+  // Custom Category toggle logic
+  const categorySelect = document.getElementById('event-category');
+  const customCategoryGroup = document.getElementById('custom-category-group');
+  const customCategoryInput = document.getElementById('custom-category');
+  const finalCategoryInput = document.getElementById('event-category-final');
+
+  function updateFinalCategory() {
+    if (categorySelect.value === 'Other') {
+      finalCategoryInput.value = customCategoryInput.value.trim();
+    } else {
+      finalCategoryInput.value = categorySelect.value;
+    }
+  }
+
+  categorySelect.addEventListener('change', () => {
+    if (categorySelect.value === 'Other') {
+      customCategoryGroup.style.display = 'block';
+      customCategoryInput.required = true;
+      customCategoryInput.focus();
+    } else {
+      customCategoryGroup.style.display = 'none';
+      customCategoryInput.required = false;
+      customCategoryInput.value = '';
+    }
+    updateFinalCategory();
+  });
+
+  customCategoryInput.addEventListener('input', updateFinalCategory);
+
   // Global Event Listener for removals
   document.addEventListener('click', (e) => {
     if (e.target && (e.target.classList.contains('remove-row-btn') || e.target.closest('.remove-row-btn'))) {
@@ -363,7 +398,7 @@
   const generateDescBtn = document.getElementById('ai-generate-desc-btn');
   generateDescBtn.addEventListener('click', async () => {
     const bulletPoints = document.getElementById('ai-bullet-points').value;
-    const category = document.getElementById('event-category').value;
+    const category = finalCategoryInput.value;
     const title = document.getElementById('event-title').value;
 
     if (!bulletPoints) {

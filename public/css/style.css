@@ -1,11 +1,8 @@
 /* public/css/style.css */
-/* Antigravity-Inspired Theme — Google Red / Yellow / Blue on Deep Black */
-/* Inspired by antigravity.google — Bold, Tricolour, Premium */
 
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,slnt,wdth,wght,ROND@8..144,-10..0,25..150,100..900,0..100&display=swap');
 
 :root {
-  /* ── Pure black base matching Antigravity.google ── */
   --bg-primary:    #000000;
   --bg-secondary:  #0a0a0a;
   --bg-card:       rgba(255, 255, 255, 0.04);
@@ -32,7 +29,7 @@
   --warning-color: #FBBC04;
   --error-color:   #EA4335;
 
-  --font-sans:    'Sora', sans-serif;
+  --font-sans:    'Google Sans Flex', sans-serif;
   --shadow-neon:  0 0 28px rgba(66, 133, 244, 0.40);
   --shadow-card:  0 20px 48px rgba(0, 0, 0, 0.75);
   --glass-bg:     rgba(0, 0, 0, 0.65);
@@ -58,16 +55,10 @@ body {
 }
 
 
-/* ── Antigravity canvas background (handled by /js/antigravity-bg.js) ── */
-/* The canvas element #ag-canvas is injected at z-index:-2 by the script.   */
-/* The cursor glow div #ag-cursor-glow is also injected by the script.       */
-/* All old particle/wireframe/pseudo-element backgrounds are removed here.   */
-
 #tsparticles {
-  display: none; /* legacy container kept in HTML but hidden */
+  display: none;
 }
 
-/* No body pseudo-element glows — canvas script renders everything */
 body::before,
 body::after {
   display: none;
@@ -173,21 +164,26 @@ button, .btn {
 
 /* Glassmorphism Header */
 header {
-  background: rgba(0, 0, 0, 0.75);
+  position: sticky;
+  top: 16px;
+  z-index: 100;
+  margin: 16px auto;
+  width: calc(100% - 32px);
+  max-width: 1400px;
+  background: rgba(0, 0, 0, 0.65);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border-bottom: 1px solid rgba(66, 133, 244, 0.15);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 100px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .nav-container {
-  max-width: 1600px;
+  max-width: 100%;
   width: 100%;
   margin: 0 auto;
-  padding: 14px 40px;
+  padding: 10px 32px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1169,6 +1165,11 @@ footer {
 
 /* Mobile Responsiveness styling */
 @media(max-width: 992px) {
+  header {
+    border-radius: 20px;
+    margin: 10px auto;
+    width: calc(100% - 20px);
+  }
   .detail-grid {
     grid-template-columns: 1fr;
   }

@@ -1,6 +1,5 @@
 // utils/emailSender.js
 // Email Notification Service with sandbox fallback.
-// Created by Ayush
 
 const nodemailer = require('nodemailer');
 const fs = require('fs');

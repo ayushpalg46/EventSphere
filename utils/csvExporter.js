@@ -1,6 +1,5 @@
 // utils/csvExporter.js
 // Quick CSV Exporter
-// Created by Ayush
 
 /**
  * Converts attendee list object array to a raw CSV string

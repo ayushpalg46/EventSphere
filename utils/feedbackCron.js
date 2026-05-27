@@ -1,6 +1,5 @@
 // utils/feedbackCron.js
 // Automated Background Worker for sending Feedback Request Emails post-event.
-// Created by Ayush
 
 const { dbQuery } = require('../database/db');
 const { sendEmail } = require('./emailSender');

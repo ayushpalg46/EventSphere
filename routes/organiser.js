@@ -1,6 +1,5 @@
 // routes/organiser.js
 // Organiser Dashboard, Event Creation, Attendees list CSV export, and Refunds management
-// Created by Ayush
 
 const express = require('express');
 const router = express.Router();

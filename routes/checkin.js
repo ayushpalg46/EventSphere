@@ -1,6 +1,5 @@
 // routes/checkin.js
 // QR Code Scan & Attendee Check-In system panel
-// Created by Ayush
 
 const express = require('express');
 const router = express.Router();
@@ -67,7 +66,7 @@ router.post('/organiser/checkin/:eventId', async (req, res) => {
 
     let booking = null;
 
-    // A student might check if token matches the ID first or standard qr_code field
+    // Check if token matches standard qr_code field
     if (isNaN(qrToken)) {
       // Find by matching the generated QR Code string (stored as Base64/token text)
       booking = await dbQuery.get(

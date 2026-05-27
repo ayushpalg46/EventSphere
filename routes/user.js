@@ -1,6 +1,5 @@
 // routes/user.js
 // Attendee dashboard, Profile updates, Address, Wishlist toggle, and Notifications panel
-// Created by Ayush
 
 const express = require('express');
 const router = express.Router();

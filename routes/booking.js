@@ -1,6 +1,5 @@
 // routes/booking.js
 // Event ticket booking and payment sandbox routes
-// Created by Ayush
 
 const express = require('express');
 const router = express.Router();
@@ -41,8 +40,7 @@ router.post('/booking/pay', isLoggedIn, async (req, res) => {
     return res.status(400).send('Session expired. Go back and select tickets again.');
   }
 
-  // Teammate's note: Razorpay checkout sandbox is simulated here. 
-  // We mock a payment ID and set state to Paid. If the user clicks pay, it's successful!
+  // Simulate payment processor response
   const paymentId = 'pay_sandbox_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
 
   try {

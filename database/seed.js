@@ -1,6 +1,5 @@
 // database/seed.js
-// Seeding the SQLite database with initial tables and dummy data so the judges/we can test it instantly!
-// Made by Ayush - 2nd Year student
+// Seed database with initial schema and sample events data
 
 const fs = require('fs');
 const path = require('path');

@@ -1,7 +1,5 @@
 // server.js
 // Main entry point for EventSphere Event Management and Ticketing Platform
-// Built by Ayush - 2nd Year Computer Science student (Hackathon submission)
-// Comments added to help my team members understand the flow!
 
 require('dotenv').config();
 
@@ -49,7 +47,7 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-// 1. View Engine Setup (using EJS because React was too complex for a 48h hackathon)
+// 1. View Engine Setup
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
@@ -169,7 +167,7 @@ app.get('/help', (req, res) => {
 // Post Customer Help Form
 app.post('/help', (req, res) => {
   const { name, email, query_subject, message } = req.body;
-  // A student would save this to a log file or just render success!
+  // Log support query info
   console.log(`[Helpdesk] Query from ${name} (${email}): [${query_subject}] ${message}`);
   res.render('pages/help', { success: 'Your query has been logged. Our customer help team will contact you shortly!' });
 });

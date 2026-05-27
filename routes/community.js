@@ -1,6 +1,5 @@
 // routes/community.js
 // Community reviews, ratings, and feedback form submissions
-// Created by Ayush
 
 const express = require('express');
 const router = express.Router();

@@ -1,6 +1,5 @@
 // routes/auth.js
 // Login, Registration, Logout routes
-// Created by Ayush
 
 const express = require('express');
 const router = express.Router();
